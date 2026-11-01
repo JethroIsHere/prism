@@ -1,0 +1,14 @@
+=== pipeline started Fri Oct 30 00:20:32 CST 2026 ===
+=== data ready, running HOG sanity check ===
+[PASS] descriptor length is 324 -- got (4, 324), expected (4, 324); hog_dimension()=324
+[PASS] all descriptors finite
+[PASS] L2-Hys bounds respected (|v| <= 1) -- max |v| = 0.7071
+[PASS] blank image -> all-zero descriptor
+[PASS] vertical edge -> bin 0 dominant (0-20 deg) -- bin energies argmax=0
+[PASS] horizontal edge -> bin 4 dominant (80-100 deg) -- bin energies argmax=4
+[FAIL] diagonal edge -> energy near 45 deg (bins 2-3) -- bin energies argmax=7
+[PASS] deterministic output
+[PASS] runs fast enough for 60k images -- 0.2 ms/image -> ~0 min for 60k
+
+OVERALL: SOME CHECKS FAILED
+SANITY CHECK FAILED - training skipped

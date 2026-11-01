@@ -1,0 +1,38 @@
+{
+  "method": "HOG + linear SVM (from scratch, NumPy)",
+  "dataset": "CIFAR-10",
+  "n_train": 50000,
+  "n_test": 10000,
+  "descriptor_dim": 1764,
+  "top1_accuracy_pct": 52.06,
+  "macro_f1": 0.5116,
+  "per_class_f1": {
+    "airplane": 0.5861,
+    "automobile": 0.6644,
+    "bird": 0.3779,
+    "cat": 0.3047,
+    "deer": 0.4009,
+    "dog": 0.3794,
+    "frog": 0.5913,
+    "horse": 0.5608,
+    "ship": 0.5896,
+    "truck": 0.6615
+  },
+  "runtime_ms_per_image_cpu": 0.13,
+  "parameter_count_millions": 0,
+  "learned_weights_actual": 17650,
+  "training_time_minutes": 0.8,
+  "hog_params": {
+    "cell_size": 4,
+    "n_bins": 9,
+    "block_cells": 2,
+    "clip": 0.2
+  },
+  "svm_hyperparams": {
+    "epochs": 25,
+    "batch_size": 256,
+    "lr": 0.1,
+    "lr_decay": 0.92,
+    "reg": 0.001
+  }
+}

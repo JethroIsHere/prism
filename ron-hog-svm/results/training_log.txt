@@ -1,0 +1,21 @@
+Loading CIFAR-10...
+  train (50000, 32, 32, 3), test (10000, 32, 32, 3)
+Computing HOG descriptors (train)...
+  (50000, 1764) in 5.0s (0.1 ms/image)
+Standardizing features...
+Training one-vs-rest linear SVM (SGD, 25 epochs)...
+  SVM training took 44.9s
+Computing HOG descriptors (test) + predicting...
+  HOG 1.1s + predict 0.2s -> 0.13 ms/image
+Top-1 accuracy: 52.06%
+Macro F1:       0.5116
+  airplane   F1=0.5861
+  automobile F1=0.6644
+  bird       F1=0.3779
+  cat        F1=0.3047
+  deer       F1=0.4009
+  dog        F1=0.3794
+  frog       F1=0.5913
+  horse      F1=0.5608
+  ship       F1=0.5896
+  truck      F1=0.6615
