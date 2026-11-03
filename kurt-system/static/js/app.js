@@ -14,28 +14,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     behavior: 'smooth'
                 });
 
-                // Update active state
                 navLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
             }
         });
     });
 
-    // Mock API call to check model status (Will be replaced with Flask fetch in Phase 3)
-    checkModelStatus();
+    // Fetch real model status from Flask Backend
+    fetchModelStatus();
 });
 
-function checkModelStatus() {
-    // Phase 2: Hardcoded status reflecting your project brief
-    const statusData = {
-        'hog': { available: false, message: 'Artifacts Missing' },
-        'cnn': { available: false, message: 'Pending Training' },
-        'resnet': { available: false, message: 'Pending Training' }
-    };
+async function fetchModelStatus() {
+    try {
+        const response = await fetch('/api/models');
+        if (!response.ok) throw new Error('Failed to fetch model status');
 
-    updateStatusUI('status-hog', statusData.hog);
-    updateStatusUI('status-cnn', statusData.cnn);
-    updateStatusUI('status-resnet', statusData.resnet);
+        const statusData = await response.json();
+
+        updateStatusUI('status-hog', statusData.hog);
+        updateStatusUI('status-cnn', statusData.cnn);
+        updateStatusUI('status-resnet', statusData.resnet);
+    } catch (error) {
+        console.error('Error fetching model statuses:', error);
+        // Fallback UI if backend is unreachable
+        updateStatusUI('status-hog', { available: false, message: 'Backend Disconnected' });
+        updateStatusUI('status-cnn', { available: false, message: 'Backend Disconnected' });
+        updateStatusUI('status-resnet', { available: false, message: 'Backend Disconnected' });
+    }
 }
 
 function updateStatusUI(elementId, status) {
@@ -43,5 +48,8 @@ function updateStatusUI(elementId, status) {
     if (!el) return;
 
     el.className = 'status-pill ' + (status.available ? 'active' : 'unavailable');
+    if (!status.available && status.message === 'Pending Training') {
+        el.className = 'status-pill pending';
+    }
     el.querySelector('.status-text').textContent = status.message;
 }

@@ -10,25 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentFile = null;
 
-    // Handle File Selection
     fileInput.addEventListener('change', function (e) {
-        if (this.files && this.files[0]) {
-            handleFile(this.files[0]);
-        }
+        if (this.files && this.files[0]) handleFile(this.files[0]);
     });
 
-    // Handle Remove Image
     removeBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        e.stopPropagation(); // Prevent triggering file input click
+        e.stopPropagation();
         resetUpload();
     });
 
-    // Form Submission
     uploadForm.addEventListener('submit', (e) => {
         e.preventDefault();
         if (!currentFile) return;
-        runMockPredictions();
+        runPredictions(currentFile);
     });
 
     function handleFile(file) {
@@ -58,39 +53,73 @@ document.addEventListener('DOMContentLoaded', () => {
         dropzonePrompt.classList.remove('hidden');
         predictBtn.disabled = true;
 
-        // Reset result cards
         document.querySelectorAll('.result-class').forEach(el => el.textContent = '—');
         document.querySelectorAll('.progress-bar-fill').forEach(el => el.style.width = '0%');
         document.querySelectorAll('.confidence-val').forEach(el => el.textContent = '—');
+        document.getElementById('recommendation-container').innerHTML = `
+            <div class="empty-state">
+                <p>Upload an image and run inference or check the metrics dashboard to see the system recommendation based on actual evaluation metrics.</p>
+            </div>`;
     }
 
-    // Phase 2: Simulate Backend Call
-    function runMockPredictions() {
+    async function runPredictions(file) {
         const originalText = predictBtn.querySelector('.btn-text').textContent;
-        predictBtn.querySelector('.btn-text').textContent = 'Processing...';
+        predictBtn.querySelector('.btn-text').textContent = 'Processing Image...';
         predictBtn.disabled = true;
 
-        // Simulate network delay
-        setTimeout(() => {
-            // Mock output update
-            updatePredictionCard('card-hog', 'No Model', 0);
-            updatePredictionCard('card-cnn', 'Pending', 0);
-            updatePredictionCard('card-resnet', 'Pending', 0);
+        // Prepare file for HTTP POST
+        const formData = new FormData();
+        formData.append('image', file);
 
-            predictBtn.querySelector('.btn-text').textContent = originalText;
-            predictBtn.disabled = false;
+        try {
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Prediction request failed');
+
+            const results = await response.json();
+
+            // Update UI with backend results
+            updatePredictionCard('card-hog', results.hog);
+            updatePredictionCard('card-cnn', results.cnn);
+            updatePredictionCard('card-resnet', results.resnet);
 
             document.getElementById('recommendation-container').innerHTML = `
-                <p><strong>System Note:</strong> Inference simulated. Waiting for Flask backend (Phase 3) and actual model artifacts to process the image.</p>
+                <p><strong>System Note:</strong> Phase 3 Backend connected successfully. Upload routed to prediction API.</p>
             `;
-        }, 1500);
+
+        } catch (error) {
+            console.error('Inference Error:', error);
+            alert('An error occurred while communicating with the server.');
+        } finally {
+            predictBtn.querySelector('.btn-text').textContent = originalText;
+            predictBtn.disabled = false;
+        }
     }
 
-    function updatePredictionCard(cardId, className, confidence) {
+    function updatePredictionCard(cardId, modelData) {
         const card = document.getElementById(cardId);
         if (!card) return;
+
+        const statusBadge = card.querySelector('.status-badge');
+        statusBadge.textContent = modelData.status.message;
+
+        // Update styling based on availability
+        if (modelData.status.available) {
+            statusBadge.className = 'status-badge active';
+        } else if (modelData.status.message === 'Pending Training') {
+            statusBadge.className = 'status-badge pending';
+        } else {
+            statusBadge.className = 'status-badge unavailable';
+        }
+
+        const className = modelData.prediction ? modelData.prediction : '—';
         card.querySelector('.result-class').textContent = className;
-        card.querySelector('.confidence-val').textContent = confidence > 0 ? (confidence * 100).toFixed(1) + '%' : 'N/A';
-        card.querySelector('.progress-bar-fill').style.width = (confidence * 100) + '%';
+
+        const confidenceStr = modelData.confidence > 0 ? (modelData.confidence * 100).toFixed(1) + '%' : 'N/A';
+        card.querySelector('.confidence-val').textContent = confidenceStr;
+        card.querySelector('.progress-bar-fill').style.width = (modelData.confidence * 100) + '%';
     }
 });
