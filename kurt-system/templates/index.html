@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRISM — Computer Vision Model Comparison Platform</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Chart.js for Evaluation Visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+
+<body>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="brand">
+                <span class="brand-logo">PRISM</span>
+                <span class="brand-sub">CV Benchmark Platform</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#dashboard" class="nav-item active">Dashboard</a>
+                <a href="#inference" class="nav-item">Inference</a>
+                <a href="#benchmark" class="nav-item">Metrics & Comparison</a>
+                <a href="#about" class="nav-item">Model Specs</a>
+            </nav>
+            <div class="dataset-badge">
+                <span class="badge-dot"></span>
+                <span>CIFAR-10 Dataset</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+
+        <!-- Hero & System Status Banner -->
+        <section id="dashboard" class="section hero-section">
+            <div class="hero-header">
+                <h1>Computer Vision Method Comparison</h1>
+                <p class="hero-description">
+                    Comparative evaluation of Classical Computer Vision (HOG + SVM), Neural Networks from scratch
+                    (Custom CNN), and Fine-tuned Deep Learning (ResNet-18) on 32x32 image classification.
+                </p>
+            </div>
+
+            <!-- Model Availability Strip -->
+            <div class="status-strip">
+                <div class="status-title">Model Registry Status:</div>
+                <div class="status-pills">
+                    <div id="status-hog" class="status-pill unavailable">
+                        <span class="indicator"></span>
+                        <span class="model-name">HOG + Linear SVM:</span>
+                        <span class="status-text">Artifacts Missing</span>
+                    </div>
+                    <div id="status-cnn" class="status-pill pending">
+                        <span class="indicator"></span>
+                        <span class="model-name">Custom CNN:</span>
+                        <span class="status-text">Pending Training</span>
+                    </div>
+                    <div id="status-resnet" class="status-pill pending">
+                        <span class="indicator"></span>
+                        <span class="model-name">ResNet-18:</span>
+                        <span class="status-text">Pending Training</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inference & Upload Section -->
+        <section id="inference" class="section inference-section">
+            <div class="section-title">
+                <h2>Image Inference Workbench</h2>
+                <p>Upload a standard image (JPG, PNG) to classify across all available models.</p>
+            </div>
+
+            <div class="workbench-grid">
+                <!-- Dropzone Card -->
+                <div class="card upload-card">
+                    <div class="card-header">
+                        <h3>Input Image Selection</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="upload-form">
+                            <div class="dropzone" id="dropzone">
+                                <input type="file" id="image-input" accept="image/jpeg, image/png, image/jpg"
+                                    class="file-input">
+                                <div class="dropzone-content" id="dropzone-prompt">
+                                    <div class="upload-icon">
+                                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="1.5">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                    </div>
+                                    <p class="dropzone-text"><strong>Click to upload</strong> or drag and drop</p>
+                                    <p class="dropzone-hint">PNG, JPG, or JPEG (Max 5MB)</p>
+                                </div>
+                                <div class="image-preview-container hidden" id="preview-container">
+                                    <img id="image-preview" src="" alt="Uploaded image preview">
+                                    <button type="button" id="remove-image-btn" class="btn-remove"
+                                        aria-label="Remove image">&times;</button>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" id="predict-btn" class="btn btn-primary" disabled>
+                                    <span class="btn-text">Run Multi-Model Prediction</span>
+                                    <span class="spinner hidden" id="predict-spinner"></span>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="upload-error" class="error-banner hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Recommendation Output Card -->
+                <div class="card recommendation-card">
+                    <div class="card-header">
+                        <h3>System Recommendation</h3>
+                        <span class="badge badge-meta">Benchmark Analysis</span>
+                    </div>
+                    <div class="card-body" id="recommendation-container">
+                        <div class="empty-state">
+                            <p>Upload an image and run inference or check the metrics dashboard to see the system
+                                recommendation based on actual evaluation metrics.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Results Panel (3 Side-by-Side Cards) -->
+            <div class="results-header">
+                <h3>Comparative Inference Output</h3>
+            </div>
+
+            <div class="prediction-grid">
+                <!-- Card 1: HOG + Linear SVM -->
+                <div class="card model-card" id="card-hog">
+                    <div class="model-card-header">
+                        <h4>HOG + Linear SVM</h4>
+                        <span class="model-type-badge classical">Classical CV</span>
+                    </div>
+                    <div class="model-card-body">
+                        <div class="prediction-status-container">
+                            <span class="status-badge unavailable">Unavailable</span>
+                        </div>
+                        <div class="prediction-result-box">
+                            <span class="label">Predicted Class</span>
+                            <span class="value result-class">—</span>
+                        </div>
+                        <div class="confidence-box">
+                            <div class="confidence-header">
+                                <span>Decision Score / Confidence</span>
+                                <span class="confidence-val">—</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model-card-footer">
+                        <span class="footer-note">Requires 32x32 Grayscale HOG Features</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: Custom CNN -->
+                <div class="card model-card" id="card-cnn">
+                    <div class="model-card-header">
+                        <h4>Custom 4-Block CNN</h4>
+                        <span class="model-type-badge nn">Scratch Neural Net</span>
+                    </div>
+                    <div class="model-card-body">
+                        <div class="prediction-status-container">
+                            <span class="status-badge pending">Pending</span>
+                        </div>
+                        <div class="prediction-result-box">
+                            <span class="label">Predicted Class</span>
+                            <span class="value result-class">—</span>
+                        </div>
+                        <div class="confidence-box">
+                            <div class="confidence-header">
+                                <span>Softmax Probability</span>
+                                <span class="confidence-val">—</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model-card-footer">
+                        <span class="footer-note">PyTorch 4-Block Convolutional Architecture</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: ResNet-18 -->
+                <div class="card model-card" id="card-resnet">
+                    <div class="model-card-header">
+                        <h4>ResNet-18</h4>
+                        <span class="model-type-badge pretrained">Pretrained Model</span>
+                    </div>
+                    <div class="model-card-body">
+                        <div class="prediction-status-container">
+                            <span class="status-badge pending">Pending</span>
+                        </div>
+                        <div class="prediction-result-box">
+                            <span class="label">Predicted Class</span>
+                            <span class="value result-class">—</span>
+                        </div>
+                        <div class="confidence-box">
+                            <div class="confidence-header">
+                                <span>Softmax Probability</span>
+                                <span class="confidence-val">—</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="model-card-footer">
+                        <span class="footer-note">Fine-Tuned ImageNet Pretrained Weights</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benchmark & Comparison Section -->
+        <section id="benchmark" class="section benchmark-section">
+            <div class="section-title">
+                <h2>Evaluation & Performance Consolidation</h2>
+                <p>Consolidated results across 10,000 CIFAR-10 test set samples.</p>
+            </div>
+
+            <div class="benchmark-grid">
+                <!-- Metrics Table -->
+                <div class="card table-card">
+                    <div class="card-header">
+                        <h3>Model Performance Summary Table</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-wrapper">
+                            <table class="metrics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Approach</th>
+                                        <th>Top-1 Accuracy</th>
+                                        <th>Macro F1</th>
+                                        <th>Runtime (ms/img)</th>
+                                        <th>Parameters (M)</th>
+                                        <th>Train Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="metrics-table-body">
+                                    <!-- Dynamic rows inserted by JS -->
+                                    <tr>
+                                        <td><strong>HOG + Linear SVM</strong></td>
+                                        <td>52.06%</td>
+                                        <td>0.5116</td>
+                                        <td>0.13 ms (CPU)</td>
+                                        <td>0 M</td>
+                                        <td>0.8 min</td>
+                                    </tr>
+                                    <tr class="row-pending">
+                                        <td><strong>Custom CNN</strong></td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                    </tr>
+                                    <tr class="row-pending">
+                                        <td><strong>ResNet-18</strong></td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                        <td>Pending</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accuracy Chart -->
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h3>Top-1 Accuracy Comparison (%)</h3>
+                    </div>
+                    <div class="card-body chart-container">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Model Architecture & Specification Section -->
+        <section id="about" class="section specs-section">
+            <div class="section-title">
+                <h2>Architectural Overview</h2>
+                <p>Understanding the theoretical differences behind each evaluation candidate.</p>
+            </div>
+
+            <div class="specs-grid">
+                <div class="card spec-card">
+                    <h3>1. HOG + Linear SVM</h3>
+                    <p class="spec-lead">Classical Computer Vision Pipeline</p>
+                    <ul>
+                        <li><strong>Feature Extraction:</strong> Histogram of Oriented Gradients captures edge
+                            structures and local shape distributions.</li>
+                        <li><strong>Classifier:</strong> Convex Linear Support Vector Machine maximizing class decision
+                            hyperplanes.</li>
+                        <li><strong>Strengths:</strong> Extremely fast CPU execution, lightweight memory footprint, zero
+                            parameter overhead.</li>
+                        <li><strong>Limitations:</strong> Sensitive to object rotations, illumination changes, and
+                            complex background clutter.</li>
+                    </ul>
+                </div>
+
+                <div class="card spec-card">
+                    <h3>2. Custom CNN</h3>
+                    <p class="spec-lead">Scratch Deep Convolutional Neural Network</p>
+                    <ul>
+                        <li><strong>Architecture:</strong> 4 convolutional blocks incorporating batch normalization,
+                            ReLU activations, and max-pooling.</li>
+                        <li><strong>Optimization:</strong> End-to-end learning trained directly on 45,000 CIFAR-10
+                            training images.</li>
+                        <li><strong>Strengths:</strong> Automatically learns hierarchical visual features without manual
+                            engineering.</li>
+                        <li><strong>Limitations:</strong> Prone to overfitting without heavy regularization; requires
+                            GPU training time.</li>
+                    </ul>
+                </div>
+
+                <div class="card spec-card">
+                    <h3>3. Fine-Tuned ResNet-18</h3>
+                    <p class="spec-lead">Pretrained Residual Network</p>
+                    <ul>
+                        <li><strong>Architecture:</strong> 18-layer residual network utilizing skip connections to
+                            eliminate vanishing gradients.</li>
+                        <li><strong>Transfer Learning:</strong> Pretrained on ImageNet and fine-tuned specifically for
+                            CIFAR-10 resolution.</li>
+                        <li><strong>Strengths:</strong> Highest spatial representation power, robustness, and superior
+                            accuracy.</li>
+                        <li><strong>Limitations:</strong> Higher computational cost per prediction and millions of
+                            parameters.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <p>PRISM — Computer Vision Final Project | West Visayas State University (WVSU-CICT)</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="../static/js/charts.js"></script>
+    <script src="../static/js/predictions.js"></script>
+    <script src="../static/js/app.js"></script>
+</body>
+
+</html>
