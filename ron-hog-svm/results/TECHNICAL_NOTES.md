@@ -1,7 +1,7 @@
 # HOG + Linear SVM — Technical Notes (Slot A, classical)
 
 For Q&A prep: everything below is implemented from scratch in
-`methods/hog_svm.py` (NumPy only). Be able to explain every step.
+`ron-hog-svm/hog_svm.py` (NumPy only). Be able to explain every step.
 
 ## HOG descriptor (per image, 32x32 RGB -> 1764 numbers)
 
@@ -67,8 +67,8 @@ training.
 
 ## Files
 
-- `methods/hog_svm.py` — the module (HOG + SVM + metrics, no sklearn)
-- `scripts/sanity_hog.py` — 10 synthetic-edge checks (all pass)
-- `scripts/train_hog_svm.py` — full training/eval pipeline
-- `results/hog_svm/` — metrics.json, confusion_matrix.png/.npy,
+- `ron-hog-svm/hog_svm.py` — the module (HOG + SVM + metrics, no sklearn)
+- `ron-hog-svm/sanity_hog.py` — 10 synthetic-edge checks (all pass)
+- `ron-hog-svm/train_hog_svm.py` — full training/eval pipeline
+- `ron-hog-svm/results/` — metrics.json, confusion_matrix.png/.npy,
   model.npz, scaler.npz, sanity_report.txt, training_log.txt

@@ -2,26 +2,29 @@
 
 Owned by: Ron (Slot A, classical method).
 
-Loads the trained artifacts from ``results/hog_svm/`` and exposes a small,
+Loads the trained artifacts from ``ron-hog-svm/results/`` and exposes a small,
 stable API that the application/system (Kurt's slot) can build against:
 
-    from methods.hog_predict import HOGClassifier
+    import sys
+    sys.path.insert(0, "ron-hog-svm")
+    from hog_predict import HOGClassifier
 
-    clf = HOGClassifier.from_results("results/hog_svm")
+    clf = HOGClassifier.from_results("ron-hog-svm/results")
     labels = clf.predict(images)          # (N,) int class ids 0-9
     scores = clf.decision_scores(images)  # (N, 10) raw one-vs-rest scores
 
-``images`` may be one image ``(H, W, 3)`` or a batch ``(N, H, W, 3)``,
-numpy uint8/float32 or a PIL Image (auto-resized to 32x32 with bilinear
-interpolation). Class ids follow ``CLASSES`` below (CIFAR-10 order).
+``images`` may be one image ``(H, W, 3)`` or a batch ``(N, H, W, 3)`` —
+a NumPy array (uint8 or float32), a PIL Image, or a file path
+(auto-resized to 32x32 with bilinear interpolation).
+Class ids follow ``CLASSES`` below (CIFAR-10 order).
 
 The trained weights (``model.npz``) and feature scaler (``scaler.npz``)
 are the exact artifacts measured at 52.06% top-1 / 0.5116 macro F1 on the
-10k CIFAR-10 test set — see ``results/hog_svm/metrics.json``.
+10k CIFAR-10 test set — see ``ron-hog-svm/results/metrics.json``.
 
 Quick check from the project root::
 
-    python methods/hog_predict.py results/hog_svm path/to/image.jpg
+    python ron-hog-svm/hog_predict.py ron-hog-svm/results path/to/image.jpg
 """
 
 import os
@@ -60,7 +63,18 @@ def _bilinear_resize(img, size):
 
 
 def _to_batch(images):
-    """Normalize input to (N, 32, 32, 3) float32 in [0, 255]."""
+    """Normalize input to (N, 32, 32, 3) float32 in [0, 255].
+
+    Accepts a file path (str / PathLike, loaded via PIL), a PIL Image,
+    or a NumPy array.
+    """
+    if isinstance(images, (str, os.PathLike)):
+        try:
+            from PIL import Image
+        except ImportError:
+            raise ValueError(
+                "Pillow is required to load image file paths: pip install pillow")
+        images = Image.open(images)
     if hasattr(images, "convert"):  # PIL Image
         images = np.asarray(images.convert("RGB"))
     arr = np.asarray(images, dtype=np.float32)
@@ -120,5 +134,5 @@ def main():
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         raise SystemExit(
-            "usage: python methods/hog_predict.py <results_dir> <image>")
+            "usage: python ron-hog-svm/hog_predict.py <results_dir> <image>")
     main()

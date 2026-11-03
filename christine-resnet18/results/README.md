@@ -1,27 +1,27 @@
 # Slot C — ResNet-18 Fine-Tuning (Christine)
 
-Your template is ready. Two files to read, one command to run.
+Your template is ready. Two files to read, one notebook to run.
 
 ## Read first (until you can explain every line — the Q&A requires it)
 
-- `methods/resnet18_finetune.py` — loads ImageNet-pretrained ResNet-18,
+- `christine-resnet18/resnet18_finetune.py` — loads ImageNet-pretrained ResNet-18,
   swaps the head for 10 CIFAR-10 classes, fine-tunes everything with Adam
   at a small lr (1e-4: the pretrained filters are already good, so we nudge
   them). Includes the residual-connection explanation for your report.
-- `scripts/train_resnet18.py` — the pipeline: canonical 45k/5k/10k splits,
-  resize to 224 + ImageNet normalization (**this is the "correct
-  preprocessing" rubric point**), 12 epochs, then one final test evaluation.
+- `shared/cnn_resnet_recipes.md` — lab-distilled tips for your slot.
 
 ## Run (Colab, GPU runtime)
 
-```bash
-python3 scripts/train_resnet18.py
-```
+Open **`train_resnet18.ipynb`** in Colab (File → Upload notebook),
+set Runtime → GPU, and run top to bottom. It clones the repo, downloads
+CIFAR-10 automatically, fine-tunes 12 epochs, and saves everything here:
+`metrics.json`, `confusion_matrix.png`, `training_curves.png`, `model.pt`,
+`training_log.txt`.
+
+(`train_resnet18.py` is the same pipeline as a script, if you prefer it.)
 
 Expected: ~20-40 min on a T4 GPU, test accuracy roughly 88-93%.
 First run downloads ImageNet weights (~45MB) automatically.
-Your outputs land here: `metrics.json`, `confusion_matrix.png`,
-`training_curves.png`, `model.pt`, `training_log.txt`.
 
 ## Your rubric points
 

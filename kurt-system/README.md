@@ -29,8 +29,9 @@ from hog_predict import HOGClassifier, CLASSES
 clf = HOGClassifier.from_results("../ron-hog-svm/results")
 print(clf.predict_labels("photo.jpg"))  # e.g. ['truck']
 ```
-`predict(images)` takes one image or a batch (numpy or PIL, any size —
-auto-resized to 32x32). `decision_scores(images)` gives raw scores.
+`predict(images)` takes one image or a batch — a NumPy array, a PIL Image,
+or a file path (any size, auto-resized to 32x32). `decision_scores(images)`
+gives raw scores.
 
 **Duke's & Christine's methods (when their training finishes):** ask them to
 add a small wrapper mirroring the same interface — `predict(images)` returning
