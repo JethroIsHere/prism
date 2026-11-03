@@ -1,8 +1,8 @@
 # Method recipes — Duke (custom CNN) & Christine (ResNet-18)
 
-Runnable templates are provided — `methods/custom_cnn.py`,
-`methods/resnet18_finetune.py`, plus `scripts/train_custom_cnn.py` and
-`scripts/train_resnet18.py`. They are starting points: read every line until
+Runnable templates are provided — `duke-custom-cnn/custom_cnn.py`,
+`christine-resnet18/resnet18_finetune.py`, plus `duke-custom-cnn/train_custom_cnn.py` and
+`christine-resnet18/train_resnet18.py`. They are starting points: read every line until
 you can explain it (the Q&A requires this), adjust the architecture or
 hyperparameters if you can justify it, and disclose AI assistance in the
 group's contribution statement.
@@ -25,7 +25,7 @@ and report both.
 
 ## Duke — 4-block custom CNN (from scratch)
 
-Implemented in `methods/custom_cnn.py`: 4 × [Conv → BatchNorm → ReLU],
+Implemented in `duke-custom-cnn/custom_cnn.py`: 4 × [Conv → BatchNorm → ReLU],
 channels 32→64→128→256, MaxPool after blocks 1–3, global average pooling,
 one FC layer → 10 (~0.39M params). Clean to defend line by line in Q&A.
 
@@ -41,7 +41,7 @@ one FC layer → 10 (~0.39M params). Clean to defend line by line in Q&A.
 
 ## Christine — ResNet-18 fine-tune
 
-Implemented in `methods/resnet18_finetune.py`: ImageNet-pretrained ResNet-18,
+Implemented in `christine-resnet18/resnet18_finetune.py`: ImageNet-pretrained ResNet-18,
 final FC replaced with 10 outputs, everything fine-tuned.
 
 - **Adam LR 1e-4** (the lab's gentler LR was the only gainer), batch 64,
@@ -58,9 +58,9 @@ final FC replaced with 10 outputs, everything fine-tuned.
 Top-1 accuracy (%), macro F1, confusion matrix, runtime ms/image (state CPU
 or GPU), parameter count in millions (0 for classical methods like HOG+SVM),
 training time in minutes — all on the canonical **45k / 5k / 10k** CIFAR-10
-split (`scripts/data_utils.py`, stratified, seed 0).
+split (`shared/data_utils.py`, stratified, seed 0).
 
 Reference numbers for context: HOG + SVM slot is done —
 **52.06% top-1, macro F1 0.5116, 0.13 ms/image CPU, 0.8 min training**
-(`results/hog_svm/`). Strong on rigid classes (truck/auto/ship), weak on
+(`ron-hog-svm/results/`). Strong on rigid classes (truck/auto/ship), weak on
 deformable animals — that gap is what your two methods are expected to close.

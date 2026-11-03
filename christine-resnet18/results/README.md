@@ -4,7 +4,7 @@ Your template is ready. Two files to read, one notebook to run.
 
 ## Read first (until you can explain every line — the Q&A requires it)
 
-- `methods/resnet18_finetune.py` — loads ImageNet-pretrained ResNet-18,
+- `christine-resnet18/resnet18_finetune.py` — loads ImageNet-pretrained ResNet-18,
   swaps the head for 10 CIFAR-10 classes, fine-tunes everything with Adam
   at a small lr (1e-4: the pretrained filters are already good, so we nudge
   them). Includes the residual-connection explanation for your report.

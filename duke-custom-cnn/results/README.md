@@ -4,7 +4,7 @@ Your template is ready. Two files to read, one notebook to run.
 
 ## Read first (until you can explain every line — the Q&A requires it)
 
-- `methods/custom_cnn.py` — the 4-block CNN: Conv→BN→ReLU blocks,
+- `duke-custom-cnn/custom_cnn.py` — the 4-block CNN: Conv→BN→ReLU blocks,
   training loop, best-validation checkpointing, curves + metrics helpers.
 - `shared/cnn_resnet_recipes.md` — lab-distilled tips for your slot.
 

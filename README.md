@@ -41,7 +41,7 @@ cv-final-project/
 ## Canonical splits (same for all three slots, per the brief)
 
 45,000 train / 5,000 val / 10,000 test — stratified, seed 0, defined once in
-`scripts/data_utils.py`. Slot A refits its final model on the full 50k train
+`shared/data_utils.py`. Slot A refits its final model on the full 50k train
 after validating hyperparameters on val (standard practice; documented in its
 technical notes).
 
@@ -52,14 +52,14 @@ Use a GPU runtime for slots B and C (Runtime > Change runtime type > T4).
 
 ```bash
 # Slot A (Ron) -- already done
-python3 scripts/sanity_hog.py      # 10 synthetic-edge checks
-python3 scripts/train_hog_svm.py   # full training + evaluation
+python3 ron-hog-svm/sanity_hog.py      # 10 synthetic-edge checks
+python3 ron-hog-svm/train_hog_svm.py   # full training + evaluation
 
 # Slot B (Duke)
-python3 scripts/train_custom_cnn.py
+python3 duke-custom-cnn/train_custom_cnn.py
 
 # Slot C (Christine)
-python3 scripts/train_resnet18.py
+python3 christine-resnet18/train_resnet18.py
 ```
 
 Each training script prints progress, then writes to its `results/<slot>/`
@@ -82,6 +82,6 @@ per-class F1, ms/image, params, training time), `confusion_matrix.png`,
 - Each method module is heavily commented — read it until you can explain
   every line. The brief requires this in the Q&A.
 - AI assistance must be disclosed in the contribution statement.
-- Slot A's honest story is in `results/hog_svm/TECHNICAL_NOTES.md`:
+- Slot A's honest story is in `ron-hog-svm/results/TECHNICAL_NOTES.md`:
   strong on rigid classes (truck/auto/ship), weak on deformable animals
   (cat/bird/dog). Slots B and C should write the same kind of notes.
