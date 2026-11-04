@@ -1,0 +1,35 @@
+{
+  "method": "ResNet-18 (ImageNet pretrained, fine-tuned)",
+  "dataset": "CIFAR-10",
+  "n_train": 45000,
+  "n_val": 5000,
+  "n_test": 10000,
+  "top1_accuracy_pct": 96.3,
+  "macro_f1": 0.963,
+  "per_class_f1": {
+    "airplane": 0.9725,
+    "automobile": 0.9786,
+    "bird": 0.9565,
+    "cat": 0.9219,
+    "deer": 0.9625,
+    "dog": 0.9333,
+    "frog": 0.9786,
+    "horse": 0.9764,
+    "ship": 0.9765,
+    "truck": 0.9729
+  },
+  "runtime_ms_per_image": 2.22,
+  "runtime_device": "cuda",
+  "parameter_count_millions": 11.18,
+  "training_time_minutes": 30.4,
+  "hyperparams": {
+    "epochs": 12,
+    "batch_size": 64,
+    "lr": 0.0001,
+    "optimizer": "Adam",
+    "weight_decay": 0.0001,
+    "scheduler": "cosine",
+    "preprocessing": "resize224+imagenet_norm",
+    "augmentation": "flip"
+  }
+}

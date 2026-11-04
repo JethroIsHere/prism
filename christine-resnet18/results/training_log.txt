@@ -1,0 +1,3 @@
+training_time_minutes: 30.4
+top1_accuracy_pct: 96.30
+macro_f1: 0.9630
