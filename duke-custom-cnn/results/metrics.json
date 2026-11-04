@@ -1,0 +1,34 @@
+{
+  "method": "Custom 4-block CNN (PyTorch, trained from scratch)",
+  "dataset": "CIFAR-10",
+  "n_train": 45000,
+  "n_val": 5000,
+  "n_test": 10000,
+  "top1_accuracy_pct": 85.22,
+  "macro_f1": 0.8519,
+  "per_class_f1": {
+    "airplane": 0.8596,
+    "automobile": 0.9345,
+    "bird": 0.807,
+    "cat": 0.7104,
+    "deer": 0.8428,
+    "dog": 0.7761,
+    "frog": 0.891,
+    "horse": 0.8774,
+    "ship": 0.915,
+    "truck": 0.9053
+  },
+  "runtime_ms_per_image": 0.29,
+  "runtime_device": "cuda",
+  "parameter_count_millions": 0.39,
+  "training_time_minutes": 9.6,
+  "hyperparams": {
+    "epochs": 30,
+    "batch_size": 128,
+    "lr": 0.001,
+    "optimizer": "Adam",
+    "weight_decay": 0.0005,
+    "scheduler": "cosine",
+    "augmentation": "random_crop+flip"
+  }
+}

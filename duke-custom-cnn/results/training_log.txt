@@ -1,0 +1,9 @@
+Using device: cuda
+Loading canonical CIFAR-10 splits (45k train / 5k val / 10k test)...
+CustomCNN: 391,466 trainable parameters (0.39M)
+Training from scratch (30 epochs, Adam lr=0.001)...
+Training took 9.6 min
+Saved training_curves.png
+Evaluating on the test set (once)...
+Top-1 accuracy: 85.22%
+Macro F1:       0.8519
