@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeBtn = document.getElementById('remove-image-btn');
     const predictBtn = document.getElementById('predict-btn');
     const uploadForm = document.getElementById('upload-form');
+    const errorBanner = document.getElementById('upload-error');
+    const predictSpinner = document.getElementById('predict-spinner');
 
     let currentFile = null;
 
@@ -121,5 +123,122 @@ document.addEventListener('DOMContentLoaded', () => {
         const confidenceStr = modelData.confidence > 0 ? (modelData.confidence * 100).toFixed(1) + '%' : 'N/A';
         card.querySelector('.confidence-val').textContent = confidenceStr;
         card.querySelector('.progress-bar-fill').style.width = (modelData.confidence * 100) + '%';
+    }
+
+    function showError(msg) {
+        if (!errorBanner) return alert(msg);
+        errorBanner.textContent = `[ERROR] ${msg}`;
+        errorBanner.classList.remove('hidden');
+    }
+
+    function clearError() {
+        if (errorBanner) errorBanner.classList.add('hidden');
+    }
+
+    fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) handleFile(this.files[0]);
+    });
+
+    // Real Drag-and-Drop Support
+    ['dragenter', 'dragover'].forEach(evtName => {
+        dropzone.addEventListener(evtName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('drag-over');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(evtName => {
+        dropzone.addEventListener(evtName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('drag-over');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files[0]) {
+            handleFile(dt.files[0]);
+        }
+    });
+
+    removeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        resetUpload();
+    });
+
+    uploadForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!currentFile) return;
+        runPredictions(currentFile);
+    });
+
+    function handleFile(file) {
+        clearError();
+        if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+            showError('Invalid file format. Upload a JPG or PNG image.');
+            return;
+        }
+
+        currentFile = file;
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            imagePreview.src = e.target.result;
+            dropzonePrompt.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+            predictBtn.disabled = false;
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function resetUpload() {
+        clearError();
+        currentFile = null;
+        fileInput.value = '';
+        imagePreview.src = '';
+        previewContainer.classList.add('hidden');
+        dropzonePrompt.classList.remove('hidden');
+        predictBtn.disabled = true;
+
+        document.querySelectorAll('.result-class').forEach(el => el.textContent = '—');
+        document.querySelectorAll('.progress-bar-fill').forEach(el => el.style.width = '0%');
+        document.querySelectorAll('.confidence-val').forEach(el => el.textContent = '—');
+    }
+
+    async function runPredictions(file) {
+        clearError();
+        const originalText = predictBtn.querySelector('.btn-text').textContent;
+        predictBtn.querySelector('.btn-text').textContent = 'EXECUTING INFERENCE...';
+        if (predictSpinner) predictSpinner.classList.remove('hidden');
+        predictBtn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const results = await response.json();
+            if (!response.ok) throw new Error(results.error || 'Prediction request failed');
+
+            updatePredictionCard('card-hog', results.hog);
+            updatePredictionCard('card-cnn', results.cnn);
+            updatePredictionCard('card-resnet', results.resnet);
+
+        } catch (error) {
+            console.error('Inference Error:', error);
+            showError(error.message || 'Server connection interrupted.');
+        } finally {
+            predictBtn.querySelector('.btn-text').textContent = originalText;
+            if (predictSpinner) predictSpinner.classList.add('hidden');
+            predictBtn.disabled = false;
+        }
     }
 });
