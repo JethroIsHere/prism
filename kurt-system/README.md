@@ -9,14 +9,36 @@ user can try. Requirements:
 2. **Output**: results drawn on the input (for classification: the predicted
    label, ideally from all three methods side by side).
 3. **Recommendation**: the system names your best method by default and
-   explains why (in our case: expected winner is ResNet-18 — confirm with
-   the real numbers once all three slots are done).
-4. **Deployment**: any application — Gradio, Streamlit, Flask, or even a
-   simple desktop GUI. Pick what you can finish fastest.
+   explains why (confirmed: ResNet-18 is crowned the winner based on verified
+   evaluation metrics — 96.30% top-1 accuracy and 0.9630 macro F1).
+4. **Deployment**: Flask web application with a dark-mode brutalist crimson bento
+   UI (HTML5, CSS3, Vanilla JavaScript, Chart.js).
 
 It must solve a **real local problem** — frame it, e.g. "classify products /
 plants / campus objects from a phone photo". (CIFAR-10 classes are the demo
 stand-in; the framing is what makes it a system, not a script.)
+
+## Installation & Setup
+
+All application dependencies are defined in `requirements.txt`:
+- `Flask==3.0.0` & `Werkzeug==3.0.1` (Web server and API request routing)
+- `Pillow>=10.2.0` (Image upload handling and preprocessing)
+- `numpy>=1.26.0` (Array operations, HOG feature extraction, and metric arrays)
+- `torch>=2.0.0` & `torchvision>=0.15.0` (PyTorch inference for Custom CNN & ResNet-18)
+- `matplotlib>=3.7.0` (Plotting and visualization utilities)
+
+### Quick Start
+```bash
+# Navigate to the system directory
+cd kurt-system
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the Flask development server (hosted at http://127.0.0.1:5000)
+python app.py
+```
+> **Runtime Note:** Model checkpoints default to CPU execution (`map_location="cpu"`), ensuring seamless local demonstration without dedicated GPU hardware.
 
 ## Integration APIs
 
@@ -33,18 +55,20 @@ print(clf.predict_labels("photo.jpg"))  # e.g. ['truck']
 or a file path (any size, auto-resized to 32x32). `decision_scores(images)`
 gives raw scores.
 
-**Duke's & Christine's methods (when their training finishes):** ask them to
-add a small wrapper mirroring the same interface — `predict(images)` returning
-class ids and a `CLASSES` tuple in CIFAR-10 order — or write thin wrappers
-yourself around their `results/*/model.pt` files.
+**Duke's & Christine's methods (fully integrated):**
+Integrated directly via PyTorch state-dict loaders into `backend/prediction_service.py`:
+- **Duke's Custom 4-Block CNN**: Loaded from `duke-custom-cnn/results/model.pt` into `CustomCNN(num_classes=10)` with CIFAR-10 normalization (`mean=(0.4914, 0.4822, 0.4465)`, `std=(0.2023, 0.1994, 0.2010)`).
+- **Christine's ResNet-18**: Loaded from `christine-resnet18/results/model.pt` into `build_model(num_classes=10, pretrained=False)` resized to 224×224 with ImageNet normalization (`mean=(0.485, 0.456, 0.406)`, `std=(0.229, 0.224, 0.225)`).
 
-## Build order (avoid the bottleneck)
+All three models run live inference on image upload via `POST /api/predict`.
 
-1. Build the UI skeleton **now** with dummy/mock predictions.
-2. Plug in Ron's HOG classifier (available today).
-3. Plug in Duke's and Christine's models as each finishes — don't wait for
-   both.
-4. Test end-to-end and record the demo.
+## Build order (status)
+
+1. [x] Build the UI skeleton with dark-mode brutalist crimson bento styling.
+2. [x] Plug in Ron's HOG classifier (`ron-hog-svm/results/`).
+3. [x] Plug in Duke's Custom CNN and Christine's ResNet-18 (`results/*/model.pt`).
+4. [x] Wire dynamic `/api/metrics` consolidation, live multi-model prediction, and automated recommendation.
+5. [ ] Test end-to-end and record the demo.
 
 ## Evaluation consolidation (your other half)
 
@@ -55,9 +79,7 @@ comparison table from those three files — no reformatting needed:
 | | Top-1 acc | Macro F1 | ms/image | Params (M) | Train time |
 |---|---|---|---|---|---|
 | HOG + SVM | 52.06% | 0.5116 | 0.13 (CPU) | 0 | 0.8 min |
-| Custom CNN | … | … | … | … | … |
-| ResNet-18 | … | … | … | … | … |
+| Custom CNN | 85.22% | 0.8519 | 0.29 (CUDA) | 0.39 | 9.6 min |
+| ResNet-18 | 96.30% | 0.9630 | 2.22 (CUDA) | 11.18 | 30.4 min |
 
-Plus the grouped bar chart (accuracy per method) and a short written
-summary of strengths/limitations per method — Jazylle needs these for
-the report and slides.
+The frontend dynamically fetches these metrics via `GET /api/metrics` to populate the comparison table and render the interactive Chart.js bar chart. An automated recommendation engine compares verified metrics and crowns ResNet-18 as the top performer, while the written strengths/limitations summary for Jazylle's report and slides is documented in the UI's Architectural Overview (`#about`) section.
