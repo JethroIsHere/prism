@@ -53,3 +53,70 @@ function updateStatusUI(elementId, status) {
     }
     el.querySelector('.status-text').textContent = status.message;
 }
+
+// Scroll-Spy for Navbar Active State & Thumb-Tracking Scroll Percentage Marker
+document.addEventListener('DOMContentLoaded', () => {
+    const sections = ['dashboard', 'inference', 'benchmark', 'about']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const scrollTelemetryEl = document.getElementById('scroll-telemetry');
+    const scrollPctEl = document.getElementById('scroll-pct');
+    let scrollHideTimer = null;
+
+    function updateScrollTelemetry(isUserScrolling = false) {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight;
+        const winHeight = window.innerHeight;
+        const scrollableDistance = docHeight - winHeight;
+
+        const progress = scrollableDistance > 0
+            ? Math.min(1, Math.max(0, scrollTop / scrollableDistance))
+            : 0;
+        const pct = Math.round(progress * 100);
+
+        if (scrollPctEl) {
+            scrollPctEl.textContent = `${String(pct).padStart(2, '0')}%`;
+        }
+
+        // Align pill vertically with the center of the red scrollbar thumb
+        if (scrollTelemetryEl && scrollableDistance > 0) {
+            const arrowOffset = 16; // Accounts for browser top/bottom scrollbar arrow buttons
+            const trackHeight = winHeight - arrowOffset * 2;
+            const thumbHeight = Math.max(36, (winHeight / docHeight) * trackHeight);
+            const maxThumbTravel = Math.max(0, trackHeight - thumbHeight);
+            const thumbCenterY = arrowOffset + (progress * maxThumbTravel) + (thumbHeight / 2);
+
+            scrollTelemetryEl.style.top = `${thumbCenterY}px`;
+
+            if (isUserScrolling) {
+                scrollTelemetryEl.classList.add('is-scrolling');
+                clearTimeout(scrollHideTimer);
+                scrollHideTimer = setTimeout(() => {
+                    scrollTelemetryEl.classList.remove('is-scrolling');
+                }, 850);
+            }
+        }
+
+        // Highlight the navbar tab currently visible in viewport
+        const triggerLine = scrollTop + winHeight * 0.35;
+        let currentId = sections[0]?.id;
+
+        for (const section of sections) {
+            if (triggerLine >= section.offsetTop) {
+                currentId = section.id;
+            }
+        }
+
+        if (currentId) {
+            navLinks.forEach(link => {
+                const isMatch = link.getAttribute('href') === `#${currentId}`;
+                link.classList.toggle('active', isMatch);
+            });
+        }
+    }
+
+    window.addEventListener('scroll', () => updateScrollTelemetry(true), { passive: true });
+    window.addEventListener('resize', () => updateScrollTelemetry(false), { passive: true });
+    updateScrollTelemetry(false);
+});

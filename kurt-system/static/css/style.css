@@ -23,6 +23,27 @@
 
 html {
     scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--prism-red) var(--bg-surface-solid);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-surface-solid);
+    border-left: 1px solid var(--border-hairline);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--prism-red);
+    border-radius: 999px;
+    border: 2px solid var(--bg-surface-solid);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff1e2d;
 }
 
 body {
@@ -196,13 +217,15 @@ h4,
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: var(--prism-red-dim);
-    border: 1px solid var(--prism-red);
-    color: var(--prism-white);
-    padding: 0.4rem 0.8rem;
-    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-hairline);
+    border-radius: 999px;
+    color: var(--text-muted);
+    padding: 0.4rem 0.95rem;
+    font-size: 0.68rem;
     text-transform: uppercase;
-    box-shadow: 0 0 16px rgba(233, 4, 19, 0.2);
+    cursor: default;
+    user-select: none;
 }
 
 .badge-dot {
@@ -898,6 +921,196 @@ h4,
     text-transform: uppercase;
     position: relative;
     z-index: 1;
+}
+
+/* Interactive Chart & Drill-Down Diagnostics Drawer */
+#accuracyChart {
+    cursor: pointer;
+}
+
+.model-detail-panel {
+    margin-top: 1.5rem;
+    border-top: 2px solid var(--prism-red);
+    animation: fadeSlideIn 0.25s ease-out;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.btn-close-panel {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--prism-white);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-close-panel:hover {
+    border-color: var(--prism-red);
+    background: var(--prism-red-dim);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+.detail-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--prism-red);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+}
+
+.detail-matrix-box img {
+    width: 100%;
+    max-width: 420px;
+    border: 1px solid var(--border-hairline);
+    background: #ffffff;
+}
+
+.class-f1-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.class-f1-cell {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background: rgba(18, 17, 26, 0.85);
+    border: 1px solid var(--border-hairline);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+}
+
+.cls-name {
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.cls-score {
+    color: var(--prism-white);
+    font-weight: 600;
+}
+
+.hyperparam-strip {
+    padding: 0.75rem;
+    border: 1px solid var(--border-hairline);
+    background: rgba(233, 4, 19, 0.06);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+}
+
+/* Live Scroll Percentage Marker (Tracks Scrollbar Thumb & Auto-Hides) */
+.scroll-telemetry {
+    position: fixed;
+    right: 16px;
+    top: 24px;
+    z-index: 95;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.65rem;
+    background: rgba(24, 22, 34, 0.94);
+    border: 1px solid var(--prism-red);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--prism-white);
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 16px rgba(233, 4, 19, 0.35);
+    opacity: 0;
+    transform: translateY(-50%) translateX(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.scroll-telemetry.is-scrolling {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+.scroll-telemetry .scroll-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--prism-red);
+    box-shadow: 0 0 8px var(--prism-red);
+}
+
+/* Hero HUD Bottom Specs with Explanatory Subtext */
+.hud-specs-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid var(--border-hairline);
+}
+
+.hud-spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.hud-spec-right {
+    text-align: right;
+}
+
+.hud-spec-main {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--prism-white);
+    letter-spacing: 0.02em;
+}
+
+.hud-spec-sub {
+    font-family: var(--font-body);
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+}
+
+/* Confusion Matrix Missing Artifact Fallback */
+.cm-fallback-box {
+    padding: 1.5rem;
+    border: 1px dashed var(--border-strong);
+    background: rgba(18, 17, 26, 0.85);
+}
+
+.cm-fallback-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--prism-red);
+    margin-bottom: 0.6rem;
+}
+
+.cm-fallback-box p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
 }
 
 /* Responsive Breakpoints */

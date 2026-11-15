@@ -38,12 +38,16 @@ class PredictionService:
         if self.registry.check_hog_status()["available"] and HOGClassifier:
             self.hog_model = HOGClassifier.from_results(os.path.join(self.base_dir, 'ron-hog-svm', 'results'))
 
-        # 2. PyTorch Image Preprocessor (for Phase 6: Duke & Christine)
-        # Standard CIFAR-10 dimensions and normalization
-        self.torch_transform = transforms.Compose([
+        # 2. PyTorch Image Preprocessors (Custom CNN = 32x32, ResNet-18 = 224x224 ImageNet)
+        self.cnn_transform = transforms.Compose([
             transforms.Resize((32, 32)),
             transforms.ToTensor(),
             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+        self.resnet_transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
         
         # 3. PyTorch Model Initialization (Duke & Christine)
@@ -90,18 +94,18 @@ class PredictionService:
         resnet_pred, resnet_conf = None, 0.0
         
         if self.cnn_model or self.resnet_model:
-            torch_img = self.torch_transform(img).unsqueeze(0).to(self.device)
-            
             with torch.no_grad():
                 if self.cnn_model:
-                    outputs = self.cnn_model(torch_img)
+                    cnn_tensor = self.cnn_transform(img).unsqueeze(0).to(self.device)
+                    outputs = self.cnn_model(cnn_tensor)
                     prob = torch.nn.functional.softmax(outputs[0], dim=0)
                     conf, class_idx = torch.max(prob, 0)
                     cnn_pred = self.cifar_classes[class_idx.item()]
                     cnn_conf = conf.item()
-                    
+
                 if self.resnet_model:
-                    outputs = self.resnet_model(torch_img)
+                    resnet_tensor = self.resnet_transform(img).unsqueeze(0).to(self.device)
+                    outputs = self.resnet_model(resnet_tensor)
                     prob = torch.nn.functional.softmax(outputs[0], dim=0)
                     conf, class_idx = torch.max(prob, 0)
                     resnet_pred = self.cifar_classes[class_idx.item()]

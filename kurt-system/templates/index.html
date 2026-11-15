@@ -25,13 +25,19 @@
         <div class="glow-blob blob-3"></div>
     </div>
 
+    <!-- Live Scroll Depth Marker -->
+    <div id="scroll-telemetry" class="scroll-telemetry" aria-hidden="true">
+        <span class="scroll-dot"></span>
+        <span id="scroll-pct">00%</span>
+    </div>
+
     <!-- Navigation Header -->
     <header class="navbar">
         <div class="nav-container">
             <div class="brand">
                 <span class="brand-mark"></span>
                 <span class="brand-logo">PRISM</span>
-                <span class="brand-sub">SYS.04 // CV BENCHMARK</span>
+                <span class="brand-sub">OBJECT CLASSIFIER</span>
             </div>
             <nav class="nav-links">
                 <a href="#dashboard" class="nav-item active">01. Overview</a>
@@ -39,9 +45,9 @@
                 <a href="#benchmark" class="nav-item">03. Metrics</a>
                 <a href="#about" class="nav-item">04. Specs</a>
             </nav>
-            <div class="dataset-badge">
+            <div class="dataset-badge" title="Trained and evaluated on the CIFAR-10 image dataset">
                 <span class="badge-dot"></span>
-                <span>CIFAR-10 [32&times;32]</span>
+                <span>DATASET: CIFAR-10 (10 CATEGORIES)</span>
             </div>
         </div>
     </header>
@@ -115,31 +121,17 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="hud-reticle-header" style="margin-bottom: 0;">
-                            <span>INPUT: RGB 32&times;32 / 224&times;224</span>
-                            <span>CLASSES: 10</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Model Availability Strip -->
-                <div class="status-strip">
-                    <div class="status-title">Model Registry Status:</div>
-                    <div class="status-pills">
-                        <div id="status-hog" class="status-pill unavailable">
-                            <span class="indicator"></span>
-                            <span class="model-name">HOG + Linear SVM:</span>
-                            <span class="status-text">Artifacts Missing</span>
-                        </div>
-                        <div id="status-cnn" class="status-pill pending">
-                            <span class="indicator"></span>
-                            <span class="model-name">Custom CNN:</span>
-                            <span class="status-text">Pending Training</span>
-                        </div>
-                        <div id="status-resnet" class="status-pill pending">
-                            <span class="indicator"></span>
-                            <span class="model-name">ResNet-18:</span>
-                            <span class="status-text">Pending Training</span>
+                        <div class="hud-specs-footer">
+                            <div class="hud-spec-item">
+                                <span class="hud-spec-main">INPUT: 32&times;32 / 224&times;224 RGB</span>
+                                <span class="hud-spec-sub">Uploaded photos auto-resize to match each model's required
+                                    input dimensions.</span>
+                            </div>
+                            <div class="hud-spec-item hud-spec-right">
+                                <span class="hud-spec-main">10 CIFAR-10 CLASSES</span>
+                                <span class="hud-spec-sub">Categories sourced from the CIFAR-10 dataset (vehicles &amp;
+                                    animals).</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,7 +222,7 @@
                             </div>
                             <div class="confidence-box">
                                 <div class="confidence-header">
-                                    <span>Decision Score / Confidence</span>
+                                    <span>Prediction Confidence</span>
                                     <span class="confidence-val">—</span>
                                 </div>
                                 <div class="progress-bar-bg">
@@ -239,7 +231,7 @@
                             </div>
                         </div>
                         <div class="model-card-footer">
-                            <span class="footer-note">Requires 32x32 Grayscale HOG Features</span>
+                            <span class="footer-note">Edge & Gradient Pattern Analysis</span>
                         </div>
                     </div>
 
@@ -259,7 +251,7 @@
                             </div>
                             <div class="confidence-box">
                                 <div class="confidence-header">
-                                    <span>Softmax Probability</span>
+                                    <span>Prediction Confidence</span>
                                     <span class="confidence-val">—</span>
                                 </div>
                                 <div class="progress-bar-bg">
@@ -268,7 +260,7 @@
                             </div>
                         </div>
                         <div class="model-card-footer">
-                            <span class="footer-note">PyTorch 4-Block Convolutional Architecture</span>
+                            <span class="footer-note">4-Layer Custom Neural Network</span>
                         </div>
                     </div>
 
@@ -288,7 +280,7 @@
                             </div>
                             <div class="confidence-box">
                                 <div class="confidence-header">
-                                    <span>Softmax Probability</span>
+                                    <span>Prediction Confidence</span>
                                     <span class="confidence-val">—</span>
                                 </div>
                                 <div class="progress-bar-bg">
@@ -297,7 +289,7 @@
                             </div>
                         </div>
                         <div class="model-card-footer">
-                            <span class="footer-note">Fine-Tuned ImageNet Pretrained Weights</span>
+                            <span class="footer-note">Pretrained Deep Residual Network</span>
                         </div>
                     </div>
                 </div>
@@ -368,6 +360,33 @@
                         </div>
                         <div class="card-body chart-container">
                             <canvas id="accuracyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Model Drill-Down Drawer (Revealed on Chart/Row Click) -->
+                <div id="model-detail-panel" class="card model-detail-panel hidden">
+                    <div class="card-header">
+                        <div>
+                            <span class="section-index" id="detail-subtitle">MODEL DIAGNOSTICS</span>
+                            <h3 id="detail-title">Select a model curve or row to inspect</h3>
+                        </div>
+                        <button type="button" id="close-detail-btn" class="btn-close-panel">&times; CLOSE</button>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-matrix-box">
+                            <span class="detail-label">10-CLASS CONFUSION MATRIX</span>
+                            <img id="detail-cm-img" src="" alt="Confusion Matrix">
+                            <div id="detail-cm-fallback" class="cm-fallback-box hidden">
+                                <span class="cm-fallback-tag">[ ARTIFACT NOT GENERATED ]</span>
+                                <p>No confusion matrix plot was exported for the baseline HOG + Linear SVM model. Review
+                                    its 10-class F1 breakdown and training hyperparameters on the right.</p>
+                            </div>
+                        </div>
+                        <div class="detail-stats-box">
+                            <span class="detail-label">PER-CLASS F1 BREAKDOWN &amp; SPECS</span>
+                            <div id="detail-class-grid" class="class-f1-grid"></div>
+                            <div id="detail-hyperparams" class="hyperparam-strip"></div>
                         </div>
                     </div>
                 </div>
