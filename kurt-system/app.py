@@ -24,6 +24,10 @@ def index():
     """Serves the main frontend dashboard."""
     return render_template('index.html')
 
+@app.route('/assets/<path:filename>')
+def serve_assets(filename):
+    assets_dir = os.path.join(os.path.dirname(__file__), 'assets')
+    return send_from_directory(assets_dir, filename)
 
 # --- API ROUTES ---
 

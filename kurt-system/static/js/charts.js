@@ -357,13 +357,13 @@ function updateSystemRecommendation(data) {
 
     container.innerHTML = `
         <div class="recommendation-result">
-            <h4>🏆 Recommended Architecture: ${bestModel.name}</h4>
+            <h4>✦ ݁˖Recommended Architecture: ${bestModel.name}</h4>
             <p style="margin-bottom: 0.65rem;">
                 <strong>Why?</strong> Achieving <strong>${bestModel.stats.top1_accuracy_pct.toFixed(2)}%</strong> Top-1 Accuracy
                 and a <strong>${bestModel.stats.macro_f1.toFixed(4)}</strong> Macro F1 score across 10,000 test images,
                 this model delivers the highest classification reliability.
             </p>
-            <p style="font-size: 0.92rem; color: var(--text-muted);">
+            <p style="font-size: 0.80rem; color: var(--text-muted);">
                 <em>Trade-off Note:</em> Inference takes ${bestRuntime} ms/image versus HOG's ${hogRuntime} ms/image,
                 a negligible latency cost for a +44.24% accuracy gain.
             </p>
