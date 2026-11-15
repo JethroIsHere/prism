@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const uploadForm = document.getElementById('upload-form');
     const fileInput = document.getElementById('image-input');
     const dropzone = document.getElementById('dropzone');
     const dropzonePrompt = document.getElementById('dropzone-prompt');
@@ -6,124 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const imagePreview = document.getElementById('image-preview');
     const removeBtn = document.getElementById('remove-image-btn');
     const predictBtn = document.getElementById('predict-btn');
-    const uploadForm = document.getElementById('upload-form');
-    const errorBanner = document.getElementById('upload-error');
+    const btnText = predictBtn.querySelector('.btn-text');
     const predictSpinner = document.getElementById('predict-spinner');
+    const errorBanner = document.getElementById('upload-error');
+    const resultsAnchor = document.getElementById('inference-results') || document.querySelector('.results-header');
 
     let currentFile = null;
+    let isExecutionComplete = false;
 
-    fileInput.addEventListener('change', function (e) {
-        if (this.files && this.files[0]) handleFile(this.files[0]);
-    });
-
-    removeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        resetUpload();
-    });
-
-    uploadForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (!currentFile) return;
-        runPredictions(currentFile);
-    });
-
-    function handleFile(file) {
-        if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
-            alert('Please upload a valid JPG or PNG image.');
-            return;
-        }
-
-        currentFile = file;
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-            imagePreview.src = e.target.result;
-            dropzonePrompt.classList.add('hidden');
-            previewContainer.classList.remove('hidden');
-            predictBtn.disabled = false;
-        };
-
-        reader.readAsDataURL(file);
-    }
-
-    function resetUpload() {
-        currentFile = null;
-        fileInput.value = '';
-        imagePreview.src = '';
-        previewContainer.classList.add('hidden');
-        dropzonePrompt.classList.remove('hidden');
-        predictBtn.disabled = true;
-
-        document.querySelectorAll('.result-class').forEach(el => el.textContent = '—');
-        document.querySelectorAll('.progress-bar-fill').forEach(el => el.style.width = '0%');
-        document.querySelectorAll('.confidence-val').forEach(el => el.textContent = '—');
-        document.getElementById('recommendation-container').innerHTML = `
-            <div class="empty-state">
-                <p>Upload an image and run inference or check the metrics dashboard to see the system recommendation based on actual evaluation metrics.</p>
-            </div>`;
-    }
-
-    async function runPredictions(file) {
-        const originalText = predictBtn.querySelector('.btn-text').textContent;
-        predictBtn.querySelector('.btn-text').textContent = 'Processing Image...';
-        predictBtn.disabled = true;
-
-        // Prepare file for HTTP POST
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            const response = await fetch('/api/predict', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('Prediction request failed');
-
-            const results = await response.json();
-
-            // Update UI with backend results
-            updatePredictionCard('card-hog', results.hog);
-            updatePredictionCard('card-cnn', results.cnn);
-            updatePredictionCard('card-resnet', results.resnet);
-
-            document.getElementById('recommendation-container').innerHTML = `
-                <p><strong>System Note:</strong> Phase 3 Backend connected successfully. Upload routed to prediction API.</p>
-            `;
-
-        } catch (error) {
-            console.error('Inference Error:', error);
-            alert('An error occurred while communicating with the server.');
-        } finally {
-            predictBtn.querySelector('.btn-text').textContent = originalText;
-            predictBtn.disabled = false;
-        }
-    }
-
-    function updatePredictionCard(cardId, modelData) {
-        const card = document.getElementById(cardId);
-        if (!card) return;
-
-        const statusBadge = card.querySelector('.status-badge');
-        statusBadge.textContent = modelData.status.message;
-
-        // Update styling based on availability
-        if (modelData.status.available) {
-            statusBadge.className = 'status-badge active';
-        } else if (modelData.status.message === 'Pending Training') {
-            statusBadge.className = 'status-badge pending';
-        } else {
-            statusBadge.className = 'status-badge unavailable';
-        }
-
-        const className = modelData.prediction ? modelData.prediction : '—';
-        card.querySelector('.result-class').textContent = className;
-
-        const confidenceStr = modelData.confidence > 0 ? (modelData.confidence * 100).toFixed(1) + '%' : 'N/A';
-        card.querySelector('.confidence-val').textContent = confidenceStr;
-        card.querySelector('.progress-bar-fill').style.width = (modelData.confidence * 100) + '%';
-    }
+    const LABELS = {
+        IDLE: 'Run Multi-Model Prediction',
+        EXECUTING: 'Executing Inference...',
+        COMPLETE: 'Execution Complete — Add Another Image'
+    };
 
     function showError(msg) {
         if (!errorBanner) return alert(msg);
@@ -135,11 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (errorBanner) errorBanner.classList.add('hidden');
     }
 
+    // Ensure clean initial button state on load
+    btnText.textContent = LABELS.IDLE;
+    predictBtn.disabled = true;
+
     fileInput.addEventListener('change', function () {
         if (this.files && this.files[0]) handleFile(this.files[0]);
     });
 
-    // Real Drag-and-Drop Support
+    // Drag-and-Drop Support
     ['dragenter', 'dragover'].forEach(evtName => {
         dropzone.addEventListener(evtName, (e) => {
             e.preventDefault();
@@ -169,8 +69,21 @@ document.addEventListener('DOMContentLoaded', () => {
         resetUpload();
     });
 
+    // Handle clicking the button when in "Execution Complete" mode
+    predictBtn.addEventListener('click', (e) => {
+        if (isExecutionComplete) {
+            e.preventDefault();
+            e.stopPropagation();
+            resetUpload();
+        }
+    });
+
     uploadForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (isExecutionComplete) {
+            resetUpload();
+            return;
+        }
         if (!currentFile) return;
         runPredictions(currentFile);
     });
@@ -181,6 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
             showError('Invalid file format. Upload a JPG or PNG image.');
             return;
         }
+
+        // Reset completion state if user drops a new image directly
+        isExecutionComplete = false;
+        predictBtn.classList.remove('btn-complete');
+        btnText.textContent = LABELS.IDLE;
 
         currentFile = file;
         const reader = new FileReader();
@@ -198,10 +116,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetUpload() {
         clearError();
         currentFile = null;
+        isExecutionComplete = false;
         fileInput.value = '';
         imagePreview.src = '';
+
         previewContainer.classList.add('hidden');
         dropzonePrompt.classList.remove('hidden');
+
+        predictBtn.classList.remove('btn-complete');
+        if (predictSpinner) predictSpinner.classList.add('hidden');
+        btnText.textContent = LABELS.IDLE;
         predictBtn.disabled = true;
 
         document.querySelectorAll('.result-class').forEach(el => el.textContent = '—');
@@ -211,8 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function runPredictions(file) {
         clearError();
-        const originalText = predictBtn.querySelector('.btn-text').textContent;
-        predictBtn.querySelector('.btn-text').textContent = 'EXECUTING INFERENCE...';
+        isExecutionComplete = false;
+        predictBtn.classList.remove('btn-complete');
+        btnText.textContent = LABELS.EXECUTING;
         if (predictSpinner) predictSpinner.classList.remove('hidden');
         predictBtn.disabled = true;
 
@@ -232,13 +157,50 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePredictionCard('card-cnn', results.cnn);
             updatePredictionCard('card-resnet', results.resnet);
 
+            // Transition button to Completion / Reset state
+            isExecutionComplete = true;
+            btnText.textContent = LABELS.COMPLETE;
+            predictBtn.classList.add('btn-complete');
+            predictBtn.disabled = false;
+
+            // Smoothly slide down to Comparative Inference Output
+            if (resultsAnchor) {
+                resultsAnchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
         } catch (error) {
             console.error('Inference Error:', error);
             showError(error.message || 'Server connection interrupted.');
-        } finally {
-            predictBtn.querySelector('.btn-text').textContent = originalText;
-            if (predictSpinner) predictSpinner.classList.add('hidden');
+            btnText.textContent = LABELS.IDLE;
             predictBtn.disabled = false;
+        } finally {
+            if (predictSpinner) predictSpinner.classList.add('hidden');
+        }
+    }
+
+    function updatePredictionCard(cardId, modelData) {
+        const card = document.getElementById(cardId);
+        if (!card || !modelData) return;
+
+        const badge = card.querySelector('.status-badge');
+        const resultClass = card.querySelector('.result-class');
+        const confVal = card.querySelector('.confidence-val');
+        const progressBar = card.querySelector('.progress-bar-fill');
+
+        if (badge && modelData.status) {
+            badge.textContent = modelData.status.message;
+            badge.className = 'status-badge ' + (modelData.status.available ? 'active' : 'unavailable');
+        }
+
+        if (modelData.prediction) {
+            resultClass.textContent = modelData.prediction;
+            const pct = Math.min(100, Math.max(0, modelData.confidence * 100)).toFixed(1);
+            confVal.textContent = `${pct}%`;
+            progressBar.style.width = `${pct}%`;
+        } else {
+            resultClass.textContent = 'N/A';
+            confVal.textContent = '—';
+            progressBar.style.width = '0%';
         }
     }
 });
