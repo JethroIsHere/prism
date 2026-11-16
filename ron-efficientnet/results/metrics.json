@@ -1,0 +1,36 @@
+{
+  "method": "EfficientNet-B0 (ImageNet pretrained, fine-tuned)",
+  "dataset": "CIFAR-10",
+  "n_train": 45000,
+  "n_val": 5000,
+  "n_test": 10000,
+  "top1_accuracy_pct": 79.88,
+  "macro_f1": 0.7982,
+  "per_class_f1": {
+    "airplane": 0.8187,
+    "automobile": 0.8919,
+    "bird": 0.7391,
+    "cat": 0.6327,
+    "deer": 0.7701,
+    "dog": 0.6957,
+    "frog": 0.8526,
+    "horse": 0.8297,
+    "ship": 0.8814,
+    "truck": 0.8697
+  },
+  "runtime_ms_per_image": 5.13,
+  "runtime_device": "cpu",
+  "parameter_count_millions": 4.02,
+  "training_time_minutes": 192.0,
+  "hyperparams": {
+    "epochs": 12,
+    "batch_size": 64,
+    "lr": 0.0001,
+    "optimizer": "Adam",
+    "weight_decay": 0.0001,
+    "scheduler": "cosine",
+    "input_size": 32,
+    "preprocessing": "resize32+imagenet_norm",
+    "augmentation": "flip"
+  }
+}
