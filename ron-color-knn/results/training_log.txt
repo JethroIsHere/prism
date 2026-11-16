@@ -1,0 +1,2 @@
+top1_accuracy_pct: 33.40
+macro_f1: 0.3289
