@@ -10,6 +10,21 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'ron-hog-svm'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'duke-custom-cnn'))
 sys.path.insert(0, os.path.join(BASE_DIR, 'christine-resnet18'))
+sys.path.insert(0, os.path.join(BASE_DIR, 'ron-color-knn'))
+sys.path.insert(0, os.path.join(BASE_DIR, 'ron-efficientnet'))
+
+# Safely import Ron's Color Histogram + k-NN Wrapper
+try:
+    from color_knn_predict import ColorKNNClassifier, CLASSES as KNN_CLASSES
+except ImportError:
+    ColorKNNClassifier = None
+    KNN_CLASSES = ()
+
+# Safely import Ron's EfficientNet-B0 Builder
+try:
+    from efficientnet_finetune import build_model as build_efficientnet
+except ImportError:
+    build_efficientnet = None
 
 # Safely import Ron's HOG Wrapper
 try:
@@ -37,6 +52,10 @@ class PredictionService:
         self.hog_model = None
         if self.registry.check_hog_status()["available"] and HOGClassifier:
             self.hog_model = HOGClassifier.from_results(os.path.join(self.base_dir, 'ron-hog-svm', 'results'))
+            # 1B. Initialize Ron's Color Histogram + k-NN Model (Slot D)
+        self.knn_model = None
+        if self.registry.check_knn_status()["available"] and ColorKNNClassifier:
+            self.knn_model = ColorKNNClassifier.from_results(os.path.join(self.base_dir, 'ron-color-knn', 'results'))
 
         # 2. PyTorch Image Preprocessors (Custom CNN = 32x32, ResNet-18 = 224x224 ImageNet)
         self.cnn_transform = transforms.Compose([
@@ -46,6 +65,11 @@ class PredictionService:
         ])
         self.resnet_transform = transforms.Compose([
             transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        ])
+        self.efficientnet_transform = transforms.Compose([
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -68,6 +92,13 @@ class PredictionService:
             resnet_path = os.path.join(self.base_dir, 'christine-resnet18', 'results', 'model.pt')
             self.resnet_model.load_state_dict(torch.load(resnet_path, map_location=self.device))
             self.resnet_model.eval()
+
+        self.efficientnet_model = None
+        if self.registry.check_efficientnet_status()["available"] and build_efficientnet:
+            self.efficientnet_model = build_efficientnet(num_classes=10, pretrained=False)
+            eff_path = os.path.join(self.base_dir, 'ron-efficientnet', 'results', 'model.pt')
+            self.efficientnet_model.load_state_dict(torch.load(eff_path, map_location=self.device))
+            self.efficientnet_model.eval()
 
     def process_image(self, image_file):
         statuses = self.registry.get_all_statuses()
@@ -92,8 +123,22 @@ class PredictionService:
         # --- PyTorch Models Inference ---
         cnn_pred, cnn_conf = None, 0.0
         resnet_pred, resnet_conf = None, 0.0
+
+        # --- Color Histogram + k-NN Inference ---
+        knn_pred = None
+        knn_conf = 0.0
+        if self.knn_model:
+            try:
+                scores = self.knn_model.decision_scores(img)[0]
+                best_idx = int(scores.argmax())
+                knn_pred = KNN_CLASSES[best_idx]
+                knn_conf = float(scores[best_idx])
+            except Exception as e:
+                print(f"Color k-NN Inference Error: {e}")
         
-        if self.cnn_model or self.resnet_model:
+        efficientnet_pred, efficientnet_conf = None, 0.0
+
+        if self.cnn_model or self.resnet_model or self.efficientnet_model:
             with torch.no_grad():
                 if self.cnn_model:
                     cnn_tensor = self.cnn_transform(img).unsqueeze(0).to(self.device)
@@ -102,6 +147,14 @@ class PredictionService:
                     conf, class_idx = torch.max(prob, 0)
                     cnn_pred = self.cifar_classes[class_idx.item()]
                     cnn_conf = conf.item()
+
+                if self.efficientnet_model:
+                    eff_tensor = self.efficientnet_transform(img).unsqueeze(0).to(self.device)
+                    outputs = self.efficientnet_model(eff_tensor)
+                    prob = torch.nn.functional.softmax(outputs[0], dim=0)
+                    conf, class_idx = torch.max(prob, 0)
+                    efficientnet_pred = self.cifar_classes[class_idx.item()]
+                    efficientnet_conf = conf.item()
 
                 if self.resnet_model:
                     resnet_tensor = self.resnet_transform(img).unsqueeze(0).to(self.device)
@@ -117,10 +170,20 @@ class PredictionService:
                 "prediction": hog_pred,
                 "confidence": hog_conf
             },
+            "knn": {
+                "status": statuses["knn"],
+                "prediction": knn_pred,
+                "confidence": knn_conf
+            },
             "cnn": {
                 "status": statuses["cnn"],
                 "prediction": cnn_pred,
                 "confidence": cnn_conf
+            },
+            "efficientnet": {
+                "status": statuses["efficientnet"],
+                "prediction": efficientnet_pred,
+                "confidence": efficientnet_conf
             },
             "resnet": {
                 "status": statuses["resnet"],

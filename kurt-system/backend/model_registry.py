@@ -12,6 +12,8 @@ class ModelRegistry:
         self.hog_dir = os.path.join(self.base_dir, 'ron-hog-svm', 'results')
         self.cnn_dir = os.path.join(self.base_dir, 'duke-custom-cnn', 'results')
         self.resnet_dir = os.path.join(self.base_dir, 'christine-resnet18', 'results')
+        self.knn_dir = os.path.join(self.base_dir, 'ron-color-knn', 'results')
+        self.efficientnet_dir = os.path.join(self.base_dir, 'ron-efficientnet', 'results')
 
     def check_hog_status(self):
         """Checks if Ron's HOG + SVM artifacts are present."""
@@ -36,10 +38,26 @@ class ModelRegistry:
             return {"available": True, "message": "Ready"}
         return {"available": False, "message": "Pending Training"}
 
+    def check_knn_status(self):
+     """Checks if Ron's Color Histogram + k-NN artifacts are present."""
+     model_path = os.path.join(self.knn_dir, 'model.npz')
+     if os.path.exists(model_path):
+         return {"available": True, "message": "Ready"}
+     return {"available": False, "message": "Artifacts Missing"}
+
+    def check_efficientnet_status(self):
+        """Checks if Ron's EfficientNet-B0 artifacts are present."""
+        model_path = os.path.join(self.efficientnet_dir, 'model.pt')
+        if os.path.exists(model_path):
+            return {"available": True, "message": "Ready"}
+        return {"available": False, "message": "Pending Training"}
+
     def get_all_statuses(self):
-        """Returns a consolidated dictionary of all model statuses."""
-        return {
-            "hog": self.check_hog_status(),
-            "cnn": self.check_cnn_status(),
-            "resnet": self.check_resnet_status()
-        }
+     """Returns a consolidated dictionary of all model statuses."""
+     return {
+         "hog": self.check_hog_status(),
+         "knn": self.check_knn_status(),
+         "cnn": self.check_cnn_status(),
+         "efficientnet": self.check_efficientnet_status(),
+         "resnet": self.check_resnet_status()
+     }

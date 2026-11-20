@@ -156,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePredictionCard('card-hog', results.hog);
             updatePredictionCard('card-cnn', results.cnn);
             updatePredictionCard('card-resnet', results.resnet);
+            updatePredictionCard('card-knn', results.knn);
+            updatePredictionCard('card-efficientnet', results.efficientnet);
 
             // Transition button to Completion / Reset state
             isExecutionComplete = true;

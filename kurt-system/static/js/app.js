@@ -34,6 +34,8 @@ async function fetchModelStatus() {
         updateStatusUI('status-hog', statusData.hog);
         updateStatusUI('status-cnn', statusData.cnn);
         updateStatusUI('status-resnet', statusData.resnet);
+        updateStatusUI('status-knn', statusData.knn);
+        updateStatusUI('status-efficientnet', statusData.efficientnet);
     } catch (error) {
         console.error('Error fetching model statuses:', error);
         // Fallback UI if backend is unreachable

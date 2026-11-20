@@ -94,9 +94,27 @@ document.addEventListener('DOMContentLoaded', () => {
             labels,
             datasets: [
                 {
+                    label: 'Color k-NN',
+                    modelKey: 'knn',
+                    peakIndex: 16,
+                    peakAccuracy: 0,
+                    data: [],
+                    borderColor: 'rgba(255, 255, 255, 0.38)',
+                    borderWidth: 1.4,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    tension: 0.42,
+                    fill: true,
+                    backgroundColor: (context) => createVerticalGradient(
+                        context.chart.ctx,
+                        context.chart.chartArea,
+                        'rgba(255, 255, 255, 0.25)'
+                    )
+                },
+                {
                     label: 'HOG + SVM',
                     modelKey: 'hog',
-                    peakIndex: 25,
+                    peakIndex: 38,
                     peakAccuracy: 0,
                     data: [],
                     borderColor: 'rgba(255, 255, 255, 0.55)',
@@ -108,17 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     backgroundColor: (context) => createVerticalGradient(
                         context.chart.ctx,
                         context.chart.chartArea,
-                        'rgba(255, 255, 255, 0.42)'
+                        'rgba(255, 255, 255, 0.38)'
                     )
                 },
                 {
-                    label: 'Custom CNN',
-                    modelKey: 'cnn',
+                    label: 'EfficientNet-B0',
+                    modelKey: 'efficientnet',
                     peakIndex: 60,
                     peakAccuracy: 0,
                     data: [],
-                    borderColor: 'rgba(255, 255, 255, 0.9)',
-                    borderWidth: 1.75,
+                    borderColor: 'rgba(255, 255, 255, 0.75)',
+                    borderWidth: 1.65,
                     pointRadius: 0,
                     pointHoverRadius: 0,
                     tension: 0.42,
@@ -126,13 +144,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     backgroundColor: (context) => createVerticalGradient(
                         context.chart.ctx,
                         context.chart.chartArea,
-                        'rgba(255, 255, 255, 0.62)'
+                        'rgba(255, 255, 255, 0.50)'
+                    )
+                },
+                {
+                    label: 'Custom CNN',
+                    modelKey: 'cnn',
+                    peakIndex: 82,
+                    peakAccuracy: 0,
+                    data: [],
+                    borderColor: 'rgba(255, 255, 255, 0.92)',
+                    borderWidth: 1.8,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    tension: 0.42,
+                    fill: true,
+                    backgroundColor: (context) => createVerticalGradient(
+                        context.chart.ctx,
+                        context.chart.chartArea,
+                        'rgba(255, 255, 255, 0.65)'
                     )
                 },
                 {
                     label: 'ResNet-18',
                     modelKey: 'resnet',
-                    peakIndex: 95,
+                    peakIndex: 104,
                     peakAccuracy: 0,
                     data: [],
                     borderColor: '#E90413',
@@ -158,9 +194,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const xValue = chart.scales.x.getValueForPixel(canvasPos.x);
                 // Match click to closest bell curve center (25 = HOG, 60 = CNN, 95 = ResNet)
                 const centers = [
-                    { key: 'hog', pos: 25 },
-                    { key: 'cnn', pos: 60 },
-                    { key: 'resnet', pos: 95 }
+                    { key: 'knn', pos: 16 },
+                    { key: 'hog', pos: 38 },
+                    { key: 'efficientnet', pos: 60 },
+                    { key: 'cnn', pos: 82 },
+                    { key: 'resnet', pos: 104 }
                 ];
                 const closest = centers.reduce((a, b) =>
                     Math.abs(b.pos - xValue) < Math.abs(a.pos - xValue) ? b : a
@@ -228,26 +266,34 @@ async function fetchMetricsAndUpdateUI() {
         const data = await response.json();
         consolidatedMetricsCache = data;
 
+        const knnAcc = data.knn ? data.knn.top1_accuracy_pct : 0;
         const hogAcc = data.hog ? data.hog.top1_accuracy_pct : 0;
+        const effAcc = data.efficientnet ? data.efficientnet.top1_accuracy_pct : 0;
         const cnnAcc = data.cnn ? data.cnn.top1_accuracy_pct : 0;
         const resAcc = data.resnet ? data.resnet.top1_accuracy_pct : 0;
 
-        // Populate bell curve datasets & peak pin metadata
         const ds = window.benchmarkChart.data.datasets;
-        ds[0].peakAccuracy = hogAcc;
-        ds[0].data = generateBellCurvePoints(hogAcc, 25);
+        ds[0].peakAccuracy = knnAcc;
+        ds[0].data = generateBellCurvePoints(knnAcc, 16, 8);
 
-        ds[1].peakAccuracy = cnnAcc;
-        ds[1].data = generateBellCurvePoints(cnnAcc, 60);
+        ds[1].peakAccuracy = hogAcc;
+        ds[1].data = generateBellCurvePoints(hogAcc, 38, 8);
 
-        ds[2].peakAccuracy = resAcc;
-        ds[2].data = generateBellCurvePoints(resAcc, 95);
+        ds[2].peakAccuracy = effAcc;
+        ds[2].data = generateBellCurvePoints(effAcc, 60, 8);
+
+        ds[3].peakAccuracy = cnnAcc;
+        ds[3].data = generateBellCurvePoints(cnnAcc, 82, 8);
+
+        ds[4].peakAccuracy = resAcc;
+        ds[4].data = generateBellCurvePoints(resAcc, 104, 8);
 
         window.benchmarkChart.update();
 
-        // Update Summary Table Rows & Bind Click-to-Inspect
         updateTableRow('hog', data.hog);
+        updateTableRow('knn', data.knn);
         updateTableRow('cnn', data.cnn);
+        updateTableRow('efficientnet', data.efficientnet);
         updateTableRow('resnet', data.resnet);
 
         updateSystemRecommendation(data);
@@ -296,7 +342,9 @@ function openModelDetailPanel(modelKey) {
 
     const names = {
         hog: 'HOG + Linear SVM — Detailed Evaluation',
+        knn: 'Color Histogram + k-NN — Detailed Evaluation',
         cnn: 'Custom 4-Block CNN — Detailed Evaluation',
+        efficientnet: 'Fine-Tuned EfficientNet-B0 — Detailed Evaluation',
         resnet: 'Fine-Tuned ResNet-18 — Detailed Evaluation'
     };
 
@@ -304,38 +352,24 @@ function openModelDetailPanel(modelKey) {
     titleEl.textContent = names[modelKey] || metrics.method;
 
     const cmFallback = document.getElementById('detail-cm-fallback');
-    if (modelKey === 'hog') {
+    if (cmFallback) cmFallback.classList.add('hidden');
+    cmImg.classList.remove('hidden');
+    cmImg.onerror = () => {
         cmImg.classList.add('hidden');
         if (cmFallback) cmFallback.classList.remove('hidden');
-    } else {
-        if (cmFallback) cmFallback.classList.add('hidden');
-        cmImg.classList.remove('hidden');
-        cmImg.onerror = () => {
-            cmImg.classList.add('hidden');
-            if (cmFallback) cmFallback.classList.remove('hidden');
-        };
-        cmImg.src = `/api/confusion-matrix/${modelKey}?t=${Date.now()}`;
-    }
+    };
+    cmImg.src = `/api/confusion-matrix/${modelKey}?t=${Date.now()}`;
+}
 
-    // Render 10-class F1 scores from metrics.json
-    if (metrics.per_class_f1) {
-        classGrid.innerHTML = Object.entries(metrics.per_class_f1)
-            .map(([cls, score]) => `
+// Render 10-class F1 scores from metrics.json
+if (metrics.per_class_f1) {
+    classGrid.innerHTML = Object.entries(metrics.per_class_f1)
+        .map(([cls, score]) => `
                 <div class="class-f1-cell">
                     <span class="cls-name">${cls}</span>
                     <span class="cls-score">${(score * 100).toFixed(1)}%</span>
                 </div>
             `).join('');
-    }
-
-    // Render training configuration summary
-    const params = metrics.hyperparams || metrics.svm_hyperparams || {};
-    hyperStrip.innerHTML = Object.entries(params)
-        .map(([k, v]) => `<span><strong>${k}:</strong> ${v}</span>`)
-        .join(' &bull; ');
-
-    panel.classList.remove('hidden');
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function updateSystemRecommendation(data) {
@@ -344,9 +378,11 @@ function updateSystemRecommendation(data) {
 
     const models = [
         { name: 'HOG + Linear SVM', stats: data.hog },
+        { name: 'Color Histogram + k-NN', stats: data.knn },
         { name: 'Custom CNN', stats: data.cnn },
+        { name: 'EfficientNet-B0', stats: data.efficientnet },
         { name: 'ResNet-18', stats: data.resnet }
-    ];
+    ].filter(m => m.stats);
 
     const bestModel = models.reduce((prev, current) =>
         prev.stats.top1_accuracy_pct > current.stats.top1_accuracy_pct ? prev : current

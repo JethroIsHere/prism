@@ -3,7 +3,6 @@ from werkzeug.utils import secure_filename
 from backend.model_registry import ModelRegistry
 from backend.prediction_service import PredictionService
 from backend.metrics_service import MetricsService
-send_from_directory
 import os
 
 # Initialize Flask app. By default, it looks for HTML in /templates and CSS/JS in /static.
@@ -52,7 +51,9 @@ def get_metrics():
 def get_confusion_matrix(model_key):
     folder_map = {
         'hog': 'ron-hog-svm',
+        'knn': 'ron-color-knn',
         'cnn': 'duke-custom-cnn',
+        'efficientnet': 'ron-efficientnet',
         'resnet': 'christine-resnet18'
     }
     if model_key not in folder_map:

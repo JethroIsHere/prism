@@ -733,14 +733,15 @@ h4,
 
 .prediction-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+    gap: 1px;
     border: 1px solid var(--border-hairline);
-    background: var(--bg-surface);
+    background: var(--border-hairline);
 }
 
 .prediction-grid .model-card {
     border: none;
-    border-right: 1px solid var(--border-hairline);
+    background: var(--bg-surface-solid);
 }
 
 .prediction-grid .model-card:last-child {
@@ -899,17 +900,17 @@ h4,
     position: relative;
 }
 
-/* Architectural Specs Grid */
 .specs-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 1px;
     border: 1px solid var(--border-hairline);
-    background: var(--bg-surface);
+    background: var(--border-hairline);
 }
 
 .specs-grid .spec-card {
     border: none;
-    border-right: 1px solid var(--border-hairline);
+    background: var(--bg-surface-solid);
 }
 
 .specs-grid .spec-card:last-child {

@@ -11,10 +11,12 @@ class MetricsService:
         
         # Define the exact paths to the expected metrics files
         self.metrics_paths = {
-            "hog": os.path.join(self.base_dir, 'ron-hog-svm', 'results', 'metrics.json'),
-            "cnn": os.path.join(self.base_dir, 'duke-custom-cnn', 'results', 'metrics.json'),
-            "resnet": os.path.join(self.base_dir, 'christine-resnet18', 'results', 'metrics.json')
-        }
+         "hog": os.path.join(self.base_dir, 'ron-hog-svm', 'results', 'metrics.json'),
+         "knn": os.path.join(self.base_dir, 'ron-color-knn', 'results', 'metrics.json'),
+         "cnn": os.path.join(self.base_dir, 'duke-custom-cnn', 'results', 'metrics.json'),
+         "efficientnet": os.path.join(self.base_dir, 'ron-efficientnet', 'results', 'metrics.json'),
+         "resnet": os.path.join(self.base_dir, 'christine-resnet18', 'results', 'metrics.json')
+     }
 
     def _load_json(self, filepath):
         """
@@ -32,11 +34,5 @@ class MetricsService:
             return None
 
     def get_consolidated_metrics(self):
-        """
-        Gathers the metrics from all three models into a single dictionary.
-        """
-        return {
-            "hog": self._load_json(self.metrics_paths["hog"]),
-            "cnn": self._load_json(self.metrics_paths["cnn"]),
-            "resnet": self._load_json(self.metrics_paths["resnet"])
-        }
+     """Gathers the metrics from all five models into a single dictionary."""
+     return {key: self._load_json(path) for key, path in self.metrics_paths.items()}

@@ -77,7 +77,7 @@
 
                         <div class="hero-telemetry-row">
                             <div class="telemetry-cell">
-                                <span class="telemetry-val">03</span>
+                                <span class="telemetry-val">05</span>
                                 <span class="telemetry-lbl">Vision Paradigms</span>
                             </div>
                             <div class="telemetry-cell">
@@ -119,6 +119,20 @@
                                         <div class="status-pill-left">
                                             <span class="indicator"></span>
                                             <span class="model-name">ResNet-18</span>
+                                        </div>
+                                        <span class="status-text">Checking...</span>
+                                    </div>
+                                    <div id="status-knn" class="status-pill unavailable">
+                                        <div class="status-pill-left">
+                                            <span class="indicator"></span>
+                                            <span class="model-name">Color Histogram + k-NN</span>
+                                        </div>
+                                        <span class="status-text">Checking...</span>
+                                    </div>
+                                    <div id="status-efficientnet" class="status-pill pending">
+                                        <div class="status-pill-left">
+                                            <span class="indicator"></span>
+                                            <span class="model-name">EfficientNet-B0</span>
                                         </div>
                                         <span class="status-text">Checking...</span>
                                     </div>
@@ -243,6 +257,35 @@
                             </div>
                         </div>
 
+                        <!-- Card 2: Color Histogram + k-NN -->
+                        <div class="card model-card" id="card-knn">
+                            <div class="model-card-header">
+                                <h4>Color Histogram + k-NN</h4>
+                                <span class="model-type-badge classical">Classical CV</span>
+                            </div>
+                            <div class="model-card-body">
+                                <div class="prediction-status-container">
+                                    <span class="status-badge unavailable">Unavailable</span>
+                                </div>
+                                <div class="prediction-result-box">
+                                    <span class="label">Predicted Class</span>
+                                    <span class="value result-class">—</span>
+                                </div>
+                                <div class="confidence-box">
+                                    <div class="confidence-header">
+                                        <span>Neighbor Vote Share</span>
+                                        <span class="confidence-val">—</span>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-card-footer">
+                                <span class="footer-note">24-D RGB Histogram &bull; k=20 Chi-Squared</span>
+                            </div>
+                        </div>
+
                         <!-- Card 2: Custom CNN -->
                         <div class="card model-card" id="card-cnn">
                             <div class="model-card-header">
@@ -300,6 +343,35 @@
                                 <span class="footer-note">Pretrained Deep Residual Network</span>
                             </div>
                         </div>
+
+                        <!-- Card 4: EfficientNet-B0 -->
+                        <div class="card model-card" id="card-efficientnet">
+                            <div class="model-card-header">
+                                <h4>EfficientNet-B0</h4>
+                                <span class="model-type-badge pretrained">Pretrained Model</span>
+                            </div>
+                            <div class="model-card-body">
+                                <div class="prediction-status-container">
+                                    <span class="status-badge pending">Pending</span>
+                                </div>
+                                <div class="prediction-result-box">
+                                    <span class="label">Predicted Class</span>
+                                    <span class="value result-class">—</span>
+                                </div>
+                                <div class="confidence-box">
+                                    <div class="confidence-header">
+                                        <span>Prediction Confidence</span>
+                                        <span class="confidence-val">—</span>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-card-footer">
+                                <span class="footer-note">Compound-Scaled MBConv Transfer Network</span>
+                            </div>
+                        </div>
                     </div>
             </section>
 
@@ -343,12 +415,28 @@
                                             <td id="hog-train">Loading...</td>
                                         </tr>
                                         <tr>
+                                            <td><strong>Color Histogram + k-NN</strong></td>
+                                            <td id="knn-acc">Loading...</td>
+                                            <td id="knn-f1">Loading...</td>
+                                            <td id="knn-time">Loading...</td>
+                                            <td id="knn-params">Loading...</td>
+                                            <td id="knn-train">Loading...</td>
+                                        </tr>
+                                        <tr>
                                             <td><strong>Custom CNN</strong></td>
                                             <td id="cnn-acc">Pending</td>
                                             <td id="cnn-f1">Pending</td>
                                             <td id="cnn-time">Pending</td>
                                             <td id="cnn-params">Pending</td>
                                             <td id="cnn-train">Pending</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>EfficientNet-B0</strong></td>
+                                            <td id="efficientnet-acc">Loading...</td>
+                                            <td id="efficientnet-f1">Loading...</td>
+                                            <td id="efficientnet-time">Loading...</td>
+                                            <td id="efficientnet-params">Loading...</td>
+                                            <td id="efficientnet-train">Loading...</td>
                                         </tr>
                                         <tr>
                                             <td><strong>ResNet-18</strong></td>
@@ -392,7 +480,7 @@
                             <img id="detail-cm-img" src="" alt="Confusion Matrix">
                             <div id="detail-cm-fallback" class="cm-fallback-box hidden">
                                 <span class="cm-fallback-tag">[ ARTIFACT NOT GENERATED ]</span>
-                                <p>No confusion matrix plot was exported for the baseline HOG + Linear SVM model. Review
+                                <p>No confusion matrix plot was exported for this model. Review
                                     its 10-class F1 breakdown and training hyperparameters on the right.</p>
                             </div>
                         </div>
@@ -461,6 +549,38 @@
                                 resolving fine-grained animal textures (Cat F1 = 0.9219; Dog F1 = 0.9333).</li>
                             <li><strong>Limitations:</strong> Requires the largest memory footprint (11.18M parameters),
                                 30.4-minute GPU training time, and 2.22 ms/image inference latency.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card spec-card">
+                        <h3>4. Color Histogram + k-NN</h3>
+                        <p class="spec-lead">Classical Non-Parametric Baseline (Slot D)</p>
+                        <ul>
+                            <li><strong>Feature Extraction:</strong> Computes a 24-dimensional normalized RGB color
+                                histogram (8 bins per channel) on 32&times;32 images without spatial edge descriptors.
+                            </li>
+                            <li><strong>Classifier:</strong> Lazy k-Nearest Neighbors (k = 20) using Chi-Squared
+                                histogram distance across all 45,000 training samples (0.00M trainable weights).</li>
+                            <li><strong>Strengths:</strong> Instant 0.18-minute indexing and handles color-distinct
+                                scenes like airplanes (F1 = 0.46) and frogs (F1 = 0.41) above random chance.</li>
+                            <li><strong>Limitations:</strong> Lacks shape and spatial awareness, yielding 33.40% Top-1
+                                accuracy and 14.20 ms/image CPU search latency.</li>
+                        </ul>
+                    </div>
+
+                    <div class="card spec-card">
+                        <h3>5. Fine-Tuned EfficientNet-B0</h3>
+                        <p class="spec-lead">Compound-Scaled Transfer Network (Slot E)</p>
+                        <ul>
+                            <li><strong>Architecture:</strong> Mobile inverted bottleneck (MBConv) blocks with
+                                Squeeze-and-Excitation channel attention and compound scaling (4.02M parameters).</li>
+                            <li><strong>Transfer Learning:</strong> Initialized with ImageNet weights and fine-tuned
+                                across 12 epochs using Adam, Cosine Annealing, and ImageNet normalization.</li>
+                            <li><strong>Strengths:</strong> Achieves 79.88% Top-1 accuracy (0.7982 Macro F1) with 64%
+                                fewer parameters than ResNet-18 (4.02M vs. 11.18M).</li>
+                            <li><strong>Limitations:</strong> Evaluated on 32&times;32 inputs rather than native
+                                224&times;224 resolution, capping fine-grained animal separation compared to ResNet-18.
+                            </li>
                         </ul>
                     </div>
                 </div>
