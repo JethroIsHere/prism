@@ -143,7 +143,10 @@ per-class F1 for HOG (0.30), k-NN, and EfficientNet (0.63) alike.
 - AI assistance must be disclosed in the contribution statement.
 - Slot A's honest story is in `ron-hog-svm/results/TECHNICAL_NOTES.md`:
   strong on rigid classes (truck/auto/ship), weak on deformable animals
-  (cat/bird/dog). Slots B–E should write the same kind of notes.
+  (cat/bird/dog). Slots D and E have the same kind of notes in their
+  own `results/` folders (color's palette problem; EfficientNet's 32x32
+  caveat and the two machine restarts it survived). Slots B and C
+  should write theirs the same way.
 - The system's default method is ResNet-18 (best accuracy), with the
   reason stated in the app: highest top-1 accuracy and macro F1 on the
   shared 10k test set.
