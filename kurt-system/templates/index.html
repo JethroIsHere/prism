@@ -67,11 +67,12 @@
                             <h1>PRISM</h1>
                             <p class="hero-tagline">A Multi-Paradigm Computer Vision Benchmark Platform</p>
                             <p class="hero-description">
-                                An interactive evaluation suite investigating how hand-designed spatial features
-                                (<strong>HOG + Linear SVM</strong>), learned-from-scratch neural representations
-                                (<strong>Custom 4-Block CNN</strong>), and transferred deep features
-                                (<strong>Fine-Tuned ResNet-18</strong>) trade off predictive accuracy, inference
-                                latency, and parameter footprint across 10,000 CIFAR-10 test images.
+                                An interactive evaluation suite comparing five CIFAR-10 classification pipelines across
+                                three vision paradigms: hand-crafted classical descriptors
+                                (<strong>HOG + Linear SVM</strong> and <strong>Color Histogram + k-NN</strong>),
+                                from-scratch deep learning (<strong>Custom 4-Block CNN</strong>), and ImageNet transfer
+                                learning (<strong>Fine-Tuned ResNet-18</strong> and <strong>EfficientNet-B0</strong>)
+                                evaluated on accuracy, latency, and parameter footprint.
                             </p>
                         </div>
 
@@ -159,7 +160,7 @@
             <section id="inference" class="section inference-section">
                 <div class="section-title">
                     <h2>Image Inference Workbench</h2>
-                    <p>Upload a standard photo (JPG or PNG) to test all three vision models side-by-side. Images are
+                    <p>Upload a standard photo (JPG or PNG) to test all five vision models side-by-side. Images are
                         automatically resized and classified into one of 10 CIFAR-10 object categories.</p>
 
                     <div class="workbench-grid">
@@ -232,19 +233,19 @@
                         <div class="card model-card" id="card-hog">
                             <div class="model-card-header">
                                 <h4>HOG + Linear SVM</h4>
-                                <span class="model-type-badge classical">Classical CV</span>
+                                <div class="model-card-badges">
+                                    <span class="model-type-badge classical">Classical CV</span>
+                                    <span class="status-badge unavailable">Checking...</span>
+                                </div>
                             </div>
                             <div class="model-card-body">
-                                <div class="prediction-status-container">
-                                    <span class="status-badge unavailable">Unavailable</span>
-                                </div>
                                 <div class="prediction-result-box">
                                     <span class="label">Predicted Class</span>
                                     <span class="value result-class">—</span>
                                 </div>
                                 <div class="confidence-box">
                                     <div class="confidence-header">
-                                        <span>Prediction Confidence</span>
+                                        <span>Decision Confidence</span>
                                         <span class="confidence-val">—</span>
                                     </div>
                                     <div class="progress-bar-bg">
@@ -253,7 +254,7 @@
                                 </div>
                             </div>
                             <div class="model-card-footer">
-                                <span class="footer-note">Edge & Gradient Pattern Analysis</span>
+                                <span class="footer-note">1,764-D Edge Descriptors &bull; OvR Linear SVM</span>
                             </div>
                         </div>
 
@@ -261,12 +262,12 @@
                         <div class="card model-card" id="card-knn">
                             <div class="model-card-header">
                                 <h4>Color Histogram + k-NN</h4>
-                                <span class="model-type-badge classical">Classical CV</span>
+                                <div class="model-card-badges">
+                                    <span class="model-type-badge classical">Classical CV</span>
+                                    <span class="status-badge unavailable">Checking...</span>
+                                </div>
                             </div>
                             <div class="model-card-body">
-                                <div class="prediction-status-container">
-                                    <span class="status-badge unavailable">Unavailable</span>
-                                </div>
                                 <div class="prediction-result-box">
                                     <span class="label">Predicted Class</span>
                                     <span class="value result-class">—</span>
@@ -286,16 +287,16 @@
                             </div>
                         </div>
 
-                        <!-- Card 2: Custom CNN -->
+                        <!-- Card 3: Custom 4-Block CNN -->
                         <div class="card model-card" id="card-cnn">
                             <div class="model-card-header">
                                 <h4>Custom 4-Block CNN</h4>
-                                <span class="model-type-badge nn">Scratch Neural Net</span>
+                                <div class="model-card-badges">
+                                    <span class="model-type-badge nn">Scratch Neural Net</span>
+                                    <span class="status-badge pending">Checking...</span>
+                                </div>
                             </div>
                             <div class="model-card-body">
-                                <div class="prediction-status-container">
-                                    <span class="status-badge pending">Pending</span>
-                                </div>
                                 <div class="prediction-result-box">
                                     <span class="label">Predicted Class</span>
                                     <span class="value result-class">—</span>
@@ -311,36 +312,7 @@
                                 </div>
                             </div>
                             <div class="model-card-footer">
-                                <span class="footer-note">4-Layer Custom Neural Network</span>
-                            </div>
-                        </div>
-
-                        <!-- Card 3: ResNet-18 -->
-                        <div class="card model-card" id="card-resnet">
-                            <div class="model-card-header">
-                                <h4>ResNet-18</h4>
-                                <span class="model-type-badge pretrained">Pretrained Model</span>
-                            </div>
-                            <div class="model-card-body">
-                                <div class="prediction-status-container">
-                                    <span class="status-badge pending">Pending</span>
-                                </div>
-                                <div class="prediction-result-box">
-                                    <span class="label">Predicted Class</span>
-                                    <span class="value result-class">—</span>
-                                </div>
-                                <div class="confidence-box">
-                                    <div class="confidence-header">
-                                        <span>Prediction Confidence</span>
-                                        <span class="confidence-val">—</span>
-                                    </div>
-                                    <div class="progress-bar-bg">
-                                        <div class="progress-bar-fill" style="width: 0%;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="model-card-footer">
-                                <span class="footer-note">Pretrained Deep Residual Network</span>
+                                <span class="footer-note">391K Params &bull; 4-Block Scratch Architecture</span>
                             </div>
                         </div>
 
@@ -348,12 +320,12 @@
                         <div class="card model-card" id="card-efficientnet">
                             <div class="model-card-header">
                                 <h4>EfficientNet-B0</h4>
-                                <span class="model-type-badge pretrained">Pretrained Model</span>
+                                <div class="model-card-badges">
+                                    <span class="model-type-badge pretrained">Pretrained Model</span>
+                                    <span class="status-badge pending">Checking...</span>
+                                </div>
                             </div>
                             <div class="model-card-body">
-                                <div class="prediction-status-container">
-                                    <span class="status-badge pending">Pending</span>
-                                </div>
                                 <div class="prediction-result-box">
                                     <span class="label">Predicted Class</span>
                                     <span class="value result-class">—</span>
@@ -369,7 +341,36 @@
                                 </div>
                             </div>
                             <div class="model-card-footer">
-                                <span class="footer-note">Compound-Scaled MBConv Transfer Network</span>
+                                <span class="footer-note">4.02M Params &bull; Compound MBConv Transfer</span>
+                            </div>
+                        </div>
+
+                        <!-- Card 5: ResNet-18 -->
+                        <div class="card model-card" id="card-resnet">
+                            <div class="model-card-header">
+                                <h4>ResNet-18</h4>
+                                <div class="model-card-badges">
+                                    <span class="model-type-badge pretrained">Pretrained Model</span>
+                                    <span class="status-badge pending">Checking...</span>
+                                </div>
+                            </div>
+                            <div class="model-card-body">
+                                <div class="prediction-result-box">
+                                    <span class="label">Predicted Class</span>
+                                    <span class="value result-class">—</span>
+                                </div>
+                                <div class="confidence-box">
+                                    <div class="confidence-header">
+                                        <span>Prediction Confidence</span>
+                                        <span class="confidence-val">—</span>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="model-card-footer">
+                                <span class="footer-note">11.18M Params &bull; 224&times;224 Residual Transfer</span>
                             </div>
                         </div>
                     </div>

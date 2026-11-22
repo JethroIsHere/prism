@@ -31,29 +31,39 @@ async function fetchModelStatus() {
 
         const statusData = await response.json();
 
-        updateStatusUI('status-hog', statusData.hog);
-        updateStatusUI('status-cnn', statusData.cnn);
-        updateStatusUI('status-resnet', statusData.resnet);
-        updateStatusUI('status-knn', statusData.knn);
-        updateStatusUI('status-efficientnet', statusData.efficientnet);
+        ['hog', 'knn', 'cnn', 'efficientnet', 'resnet'].forEach(key => {
+            updateStatusUI(`status-${key}`, statusData[key]);
+            syncPredictionCardBadge(`card-${key}`, statusData[key]);
+        });
     } catch (error) {
         console.error('Error fetching model statuses:', error);
-        // Fallback UI if backend is unreachable
-        updateStatusUI('status-hog', { available: false, message: 'Backend Disconnected' });
-        updateStatusUI('status-cnn', { available: false, message: 'Backend Disconnected' });
-        updateStatusUI('status-resnet', { available: false, message: 'Backend Disconnected' });
+        ['hog', 'knn', 'cnn', 'efficientnet', 'resnet'].forEach(key => {
+            const fallback = { available: false, message: 'Backend Disconnected' };
+            updateStatusUI(`status-${key}`, fallback);
+            syncPredictionCardBadge(`card-${key}`, fallback);
+        });
     }
 }
 
 function updateStatusUI(elementId, status) {
     const el = document.getElementById(elementId);
-    if (!el) return;
+    if (!el || !status) return;
 
     el.className = 'status-pill ' + (status.available ? 'active' : 'unavailable');
     if (!status.available && status.message === 'Pending Training') {
         el.className = 'status-pill pending';
     }
     el.querySelector('.status-text').textContent = status.message;
+}
+
+function syncPredictionCardBadge(cardId, status) {
+    const card = document.getElementById(cardId);
+    if (!card || !status) return;
+    const badge = card.querySelector('.status-badge');
+    if (!badge) return;
+
+    badge.textContent = status.message;
+    badge.className = 'status-badge ' + (status.available ? 'active' : (status.message === 'Pending Training' ? 'pending' : 'unavailable'));
 }
 
 // Scroll-Spy for Navbar Active State & Thumb-Tracking Scroll Percentage Marker

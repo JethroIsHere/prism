@@ -359,17 +359,28 @@ function openModelDetailPanel(modelKey) {
         if (cmFallback) cmFallback.classList.remove('hidden');
     };
     cmImg.src = `/api/confusion-matrix/${modelKey}?t=${Date.now()}`;
-}
 
-// Render 10-class F1 scores from metrics.json
-if (metrics.per_class_f1) {
-    classGrid.innerHTML = Object.entries(metrics.per_class_f1)
-        .map(([cls, score]) => `
+    // Render 10-class F1 scores from metrics.json
+    if (metrics.per_class_f1 && classGrid) {
+        classGrid.innerHTML = Object.entries(metrics.per_class_f1)
+            .map(([cls, score]) => `
                 <div class="class-f1-cell">
                     <span class="cls-name">${cls}</span>
                     <span class="cls-score">${(score * 100).toFixed(1)}%</span>
                 </div>
             `).join('');
+    }
+
+    // Render training configuration summary
+    const params = metrics.hyperparams || metrics.svm_hyperparams || metrics.knn_params || {};
+    if (hyperStrip) {
+        hyperStrip.innerHTML = Object.entries(params)
+            .map(([k, v]) => `<span><strong>${k}:</strong> ${Array.isArray(v) ? v.join(', ') : v}</span>`)
+            .join(' &bull; ');
+    }
+
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function updateSystemRecommendation(data) {
@@ -401,7 +412,8 @@ function updateSystemRecommendation(data) {
             </p>
             <p style="font-size: 0.80rem; color: var(--text-muted);">
                 <em>Trade-off Note:</em> Inference takes ${bestRuntime} ms/image versus HOG's ${hogRuntime} ms/image,
-                a negligible latency cost for a +44.24% accuracy gain.
+                delivering a +${(bestModel.stats.top1_accuracy_pct - data.hog.top1_accuracy_pct).toFixed(2)}% accuracy gain
+                and outperforming all five evaluated classical, scratch, and transfer baselines.
             </p>
         </div>
     `;
