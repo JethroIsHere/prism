@@ -7,7 +7,7 @@ user can try. Requirements:
 
 1. **Input**: the user uploads an image or video.
 2. **Output**: results drawn on the input (for classification: the predicted
-   label, ideally from all three methods side by side).
+   label, ideally from all five methods side by side).
 3. **Recommendation**: the system names your best method by default and
    explains why (confirmed: ResNet-18 is crowned the winner based on verified
    evaluation metrics — 96.30% top-1 accuracy and 0.9630 macro F1).
@@ -60,26 +60,29 @@ Integrated directly via PyTorch state-dict loaders into `backend/prediction_serv
 - **Duke's Custom 4-Block CNN**: Loaded from `duke-custom-cnn/results/model.pt` into `CustomCNN(num_classes=10)` with CIFAR-10 normalization (`mean=(0.4914, 0.4822, 0.4465)`, `std=(0.2023, 0.1994, 0.2010)`).
 - **Christine's ResNet-18**: Loaded from `christine-resnet18/results/model.pt` into `build_model(num_classes=10, pretrained=False)` resized to 224×224 with ImageNet normalization (`mean=(0.485, 0.456, 0.406)`, `std=(0.229, 0.224, 0.225)`).
 
-All three models run live inference on image upload via `POST /api/predict`.
+All five models run live inference on image upload via `POST /api/predict`.
 
 ## Build order (status)
 
 1. [x] Build the UI skeleton with dark-mode brutalist crimson bento styling.
 2. [x] Plug in Ron's HOG classifier (`ron-hog-svm/results/`).
 3. [x] Plug in Duke's Custom CNN and Christine's ResNet-18 (`results/*/model.pt`).
-4. [x] Wire dynamic `/api/metrics` consolidation, live multi-model prediction, and automated recommendation.
-5. [ ] Test end-to-end and record the demo.
+4. [x] Plug in Ron's Color Histogram + k-NN and EfficientNet-B0 (`results/*`).
+5. [x] Wire dynamic `/api/metrics` consolidation, live multi-model prediction, and automated recommendation.
+6. [x] Test end-to-end and record the demo.
 
 ## Evaluation consolidation (your other half)
 
 Each slot's `results/*/metrics.json` uses the **same schema** (accuracy,
 macro F1, per-class F1, ms/image, params, training time). Build the
-comparison table from those three files — no reformatting needed:
+comparison table from those five files — no reformatting needed:
 
-| | Top-1 acc | Macro F1 | ms/image | Params (M) | Train time |
+| Method | Top-1 acc | Macro F1 | ms/image | Params (M) | Train time |
 |---|---|---|---|---|---|
+| Color + k-NN | 33.40% | 0.3289 | 14.2 (CPU) | 0 | 0.18 min |
 | HOG + SVM | 52.06% | 0.5116 | 0.13 (CPU) | 0 | 0.8 min |
 | Custom CNN | 85.22% | 0.8519 | 0.29 (CUDA) | 0.39 | 9.6 min |
+| EfficientNet-B0 | 79.88% | 0.7982 | 5.13 (CPU) | 4.02 | 192.0 min |
 | ResNet-18 | 96.30% | 0.9630 | 2.22 (CUDA) | 11.18 | 30.4 min |
 
 The frontend dynamically fetches these metrics via `GET /api/metrics` to populate the comparison table and render the interactive Chart.js bar chart. An automated recommendation engine compares verified metrics and crowns ResNet-18 as the top performer, while the written strengths/limitations summary for Jazylle's report and slides is documented in the UI's Architectural Overview (`#about`) section.

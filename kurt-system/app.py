@@ -37,7 +37,7 @@ def health_check():
 
 @app.route('/api/models', methods=['GET'])
 def get_model_status():
-    """Returns the availability status of HOG, CNN, and ResNet."""
+    """Returns the availability status of all five models: HOG, k-NN, CNN, EfficientNet, and ResNet."""
     statuses = registry.get_all_statuses()
     return jsonify(statuses), 200
 

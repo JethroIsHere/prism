@@ -42,7 +42,7 @@ except ImportError:
 
 class PredictionService:
     """
-    Handles routing the uploaded image to the three different models.
+    Handles routing the uploaded image to the five different models.
     """
     def __init__(self):
         self.registry = ModelRegistry()

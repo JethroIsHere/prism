@@ -2,7 +2,7 @@ import os
 
 class ModelRegistry:
     """
-    Manages the availability of the three Computer Vision models.
+    Manages the availability of the five Computer Vision models.
     It checks the repository directory structure for required artifacts.
     """
     def __init__(self):

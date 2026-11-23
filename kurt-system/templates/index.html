@@ -58,29 +58,26 @@
 
         <!-- Hero & System Status Banner -->
         <section id="dashboard" class="section hero-section">
-            <!-- 01 // Editorial Bento Hero & Registry HUD -->
-            <section id="dashboard" class="section hero-section">
-                <div class="hero-bento">
-                    <div class="hero-copy-pane">
-                        <div>
-                            <div class="hero-eyebrow">[ CCS 250 : OPTICAL CLASSIFICATION ENGINE ]</div>
-                            <h1>PRISM</h1>
-                            <p class="hero-tagline">A Multi-Paradigm Computer Vision Benchmark Platform</p>
-                            <p class="hero-description">
-                                An interactive evaluation suite comparing five CIFAR-10 classification pipelines across
-                                three vision paradigms: hand-crafted classical descriptors
-                                (<strong>HOG + Linear SVM</strong> and <strong>Color Histogram + k-NN</strong>),
-                                from-scratch deep learning (<strong>Custom 4-Block CNN</strong>), and ImageNet transfer
-                                learning (<strong>Fine-Tuned ResNet-18</strong> and <strong>EfficientNet-B0</strong>)
-                                evaluated on accuracy, latency, and parameter footprint.
-                            </p>
-                        </div>
+            <div class="hero-bento">
+                <div class="hero-copy-pane">
+                    <div>
+                        <div class="hero-eyebrow">[ CCS 250 : OPTICAL CLASSIFICATION ENGINE ]</div>
+                        <h1>PRISM</h1>
+                        <p class="hero-tagline">A Multi-Paradigm Computer Vision Benchmark Platform</p>
+                        <p class="hero-description">
+                            An interactive evaluation suite comparing five CIFAR-10 vision models across three paradigms:
+                            hand-crafted classical descriptors (<strong>HOG + Linear SVM</strong> and <strong>Color Histogram + k-NN</strong>),
+                            from-scratch deep learning (<strong>Custom 4-Block CNN</strong>), and ImageNet transfer learning
+                            (<strong>Fine-Tuned ResNet-18</strong> and <strong>EfficientNet-B0</strong>), evaluated across
+                            accuracy, latency, and parameter footprint.
+                        </p>
+                    </div>
 
-                        <div class="hero-telemetry-row">
-                            <div class="telemetry-cell">
-                                <span class="telemetry-val">05</span>
-                                <span class="telemetry-lbl">Vision Paradigms</span>
-                            </div>
+                    <div class="hero-telemetry-row">
+                        <div class="telemetry-cell">
+                            <span class="telemetry-val">05</span>
+                            <span class="telemetry-lbl">Vision Models</span>
+                        </div>
                             <div class="telemetry-cell">
                                 <span class="telemetry-val">10,000</span>
                                 <span class="telemetry-lbl">Test Set Samples</span>
@@ -221,7 +218,7 @@
                         </div>
                     </div>
 
-                    <!-- Prediction Results Panel (3 Side-by-Side Cards) -->
+                    <!-- Prediction Results Panel (5 Side-by-Side Cards) -->
                     <div id="inference-results" class="results-header results-header-stacked">
                         <h3>Comparative Inference Output</h3>
                         <p class="results-subtext">Side-by-side predictions showing how each paradigm interprets your
@@ -521,7 +518,7 @@
 
                     <div class="card spec-card">
                         <h3>2. Custom 4-Block CNN</h3>
-                        <p class="spec-lead">Scratch Deep Learning Architecture (Slot C)</p>
+                        <p class="spec-lead">Scratch Deep Learning Architecture (Slot B)</p>
                         <ul>
                             <li><strong>Architecture:</strong> Four sequential Conv-BatchNorm-ReLU blocks expanding
                                 channels (32&rarr;64&rarr;128&rarr;256) with Max Pooling and Global Average Pooling
@@ -538,7 +535,7 @@
 
                     <div class="card spec-card">
                         <h3>3. Fine-Tuned ResNet-18</h3>
-                        <p class="spec-lead">Transfer Learning Baseline (Slot B)</p>
+                        <p class="spec-lead">Transfer Learning Baseline (Slot C)</p>
                         <ul>
                             <li><strong>Architecture:</strong> 18-layer deep residual network with identity skip
                                 connections, replacing the 1,000-class head with a 10-class CIFAR-10 classifier (11.18M

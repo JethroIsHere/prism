@@ -3,7 +3,7 @@ import json
 
 class MetricsService:
     """
-    Reads and consolidates the evaluation results (metrics.json) from all three models.
+    Reads and consolidates the evaluation results (metrics.json) from all five models.
     """
     def __init__(self):
         # Navigate up to the main prism repository folder
